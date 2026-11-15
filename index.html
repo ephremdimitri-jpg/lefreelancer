@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Le Freelancer : partenaire technique et graphique des professionnels du BTP. Plans et DAO, modélisation 3D, rendus et assistance chantier, au Burkina Faso et à l’international.">
+<meta property="og:title" content="Le Freelancer · Plans, 3D et assistance BTP">
+<meta property="og:description" content="Plans, maquettes 3D, rendus et renfort d’équipe pour les professionnels du BTP. Devis sur mesure.">
+<meta property="og:image" content="img/u_hero.jpg">
+<link rel="icon" href="img/logo_lf.webp" type="image/webp">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Le Freelancer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500;75..125,700;75..125,900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Le Freelancer : noir graphite et or du logo. Pages distinctes (accueil, services, réalisations, assistance, demande), cotes de plan en mono. */
+:root {
+  --fond: #f5f3ee; --fond-2: #ebe7de; --encre: #141413; --gris: #5d5a54; --or: #d7920f; --or-fonce: #a86f05; --filet: #d6d0c3; --sur-or: #141413; --nuit: #111110; --clair: #f5f3ee;
+  --f-titre: "Archivo", "Arial Narrow", Arial, sans-serif; --f-texte: "Instrument Sans", "Segoe UI", system-ui, sans-serif; --f-cote: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --fond: #121211; --fond-2: #1d1c1a; --encre: #f2efe8; --gris: #a7a297; --or: #f0a91c; --or-fonce: #f0a91c; --filet: #34322e; color-scheme: dark } }
+:root[data-theme="dark"] { --fond: #121211; --fond-2: #1d1c1a; --encre: #f2efe8; --gris: #a7a297; --or: #f0a91c; --or-fonce: #f0a91c; --filet: #34322e; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fond); color: var(--encre); font: 400 16px/1.6 var(--f-texte); overflow-x: hidden; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--or); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--f-titre); margin: 0; text-wrap: balance; }
+.wrap { max-width: 1260px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cote { font: 500 12px/1.3 var(--f-cote); letter-spacing: .07em; text-transform: uppercase; color: var(--gris); }
+
+/* barre de navigation */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--fond); }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 25; background: color-mix(in srgb, var(--fond) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--filet); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-block: 10px; }
+.marque { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 900 20px var(--f-titre); white-space: nowrap; }
+.marque img { width: 42px; height: 42px; object-fit: contain; background: #fff; border-radius: 8px; padding: 2px; }
+.marque b { color: var(--or-fonce); }
+nav.menu { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+nav.menu a { text-decoration: none; font-weight: 600; font-size: 15px; padding: 7px 12px; border-radius: 999px; transition: background .2s, color .2s; }
+nav.menu a:hover { background: var(--fond-2); }
+nav.menu a[aria-current="page"] { background: var(--encre); color: var(--fond); }
+nav.menu a.cta { background: var(--or); color: var(--sur-or); }
+.burger { display: none; font: 700 15px var(--f-texte); background: var(--encre); color: var(--fond); border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 700 15px var(--f-texte); text-decoration: none; background: var(--or); color: var(--sur-or); border: 0; border-radius: 999px; padding: 12px 20px; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px var(--or); }
+.btn.ligne { background: transparent; color: inherit; border: 1.5px solid currentColor; }
+.btn .fl { transition: transform .2s; } .btn:hover .fl { transform: translateX(4px); }
+
+/* pages */
+.vue { animation: page .5s cubic-bezier(.2,.8,.2,1); }
+.vue[hidden] { display: none; }
+@keyframes page { from { opacity: .4; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+section.bloc { padding-block: 64px 24px; }
+.tete { display: flex; justify-content: space-between; align-items: end; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+.tete h2 { font-size: clamp(34px, 5vw, 64px); font-weight: 900; font-stretch: 110%; letter-spacing: -.025em; line-height: .95; }
+.tete h2 em { font-style: normal; color: var(--or-fonce); }
+.tete p { max-width: 50ch; margin: 0; color: var(--gris); }
+.page-titre { padding-block: 56px 10px; border-bottom: 2px solid var(--encre); }
+.page-titre h1 { font-size: clamp(42px, 7vw, 92px); font-weight: 900; font-stretch: 112%; letter-spacing: -.03em; line-height: .9; }
+.page-titre h1 em { font-style: normal; color: var(--or-fonce); }
+.page-titre p { max-width: 60ch; color: var(--gris); font-size: 18px; margin: 14px 0 22px; }
+
+/* ACCUEIL : ouverture plein cadre */
+.hero { position: relative; overflow: hidden; background: var(--nuit); color: var(--clair); min-height: min(86vh, 820px); display: grid; }
+.hero .diapo { position: absolute; inset: -30px; transition: transform .4s ease-out; }
+.hero .diapo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.4s ease; }
+.hero .diapo img.on { opacity: .58; animation: zoom 9s ease-out forwards; }
+@keyframes zoom { from { transform: scale(1.14); } to { transform: scale(1.02); } }
+.hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 60%, rgba(10,10,9,.2), rgba(10,10,9,.85) 75%), linear-gradient(90deg, rgba(10,10,9,.75), transparent 70%); pointer-events: none; }
+.hero .halo { position: absolute; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(240,169,28,.28), transparent 65%); pointer-events: none; z-index: 1; transform: translate(-50%, -50%); left: 70%; top: 40%; transition: left .25s ease-out, top .25s ease-out; }
+.hero .wrap { position: relative; z-index: 2; padding-block: 64px 40px; display: grid; align-content: end; gap: 22px; width: 100%; }
+.hero .devise { display: flex; gap: 14px; flex-wrap: wrap; font: 500 13px var(--f-cote); letter-spacing: .22em; color: #e8b54a; }
+.hero h1 { font-size: clamp(46px, 8.6vw, 124px); font-weight: 900; font-stretch: 112%; line-height: .88; letter-spacing: -.04em; }
+.hero h1 .l { display: block; overflow: hidden; }
+.hero h1 .l > span { display: inline-block; animation: monte .9s cubic-bezier(.2,.8,.2,1) both; }
+.hero h1 .l:nth-child(2) > span { animation-delay: .12s; }
+@keyframes monte { from { transform: translateY(70%); } to { transform: none; } }
+.hero h1 .tourne { color: #f0a91c; display: inline-block; }
+.hero h1 .tourne span { display: inline-block; animation: entre .55s cubic-bezier(.2,.8,.2,1); }
+@keyframes entre { from { transform: translateY(.4em); opacity: .15; } to { transform: none; opacity: 1; } }
+.hero p { font-size: clamp(17px, 1.8vw, 21px); max-width: 54ch; margin: 0; color: #e7e2d8; }
+.hero .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero .actions .ligne { color: #f5f3ee; }
+.hero .bas { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 18px; }
+.hero .points { display: flex; gap: 8px; }
+.hero .points button { width: 26px; height: 4px; border: 0; background: rgba(255,255,255,.35); cursor: pointer; padding: 0; transition: background .3s, width .3s; }
+.hero .points button.on { background: #f0a91c; width: 44px; }
+.hero .leg { font: 500 12px var(--f-cote); color: #d8d2c6; letter-spacing: .06em; }
+
+.defile { background: var(--or); color: var(--sur-or); overflow: hidden; border-block: 2px solid var(--encre); }
+.defile .piste { display: flex; gap: 40px; width: max-content; padding-block: 12px; animation: defile 38s linear infinite; font: 800 20px var(--f-titre); font-stretch: 110%; text-transform: uppercase; }
+.defile .piste span::after { content: "✦"; margin-left: 40px; }
+@keyframes defile { to { transform: translateX(-50%); } }
+
+/* ACCUEIL commercial */
+.h2o { padding-block: 48px 56px; background: var(--fond); }
+.h2o .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: center; }
+.badge-pro { display: inline-block; font: 600 13px var(--f-texte); background: var(--fond-2); border: 1px solid var(--filet); border-radius: 999px; padding: 6px 14px; }
+.h2o h1 { font-size: clamp(38px, 5.4vw, 72px); font-weight: 900; font-stretch: 108%; line-height: .98; letter-spacing: -.03em; margin: 18px 0 16px; animation: page .7s cubic-bezier(.2,.8,.2,1); }
+.h2o h1 em { font-style: normal; color: var(--or-fonce); }
+.h2o p { font-size: 19px; color: var(--gris); max-width: 50ch; margin: 0 0 24px; }
+.h2o-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn.gros { padding: 15px 24px; font-size: 16px; }
+.btn.noir { background: var(--encre); color: var(--fond); }
+.garanties { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-weight: 600; font-size: 15px; }
+.garanties li::before { content: "✓"; color: var(--or-fonce); font-weight: 800; margin-right: 8px; }
+.h2o-vis { position: relative; }
+.h2o-vis img { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; border-radius: 4px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.45); }
+.flottant { position: absolute; background: var(--fond); color: var(--encre); padding: 12px 16px; border-radius: 10px; box-shadow: 0 14px 30px -14px rgba(0,0,0,.4); display: grid; gap: 2px; animation: flotte 5s ease-in-out infinite; }
+.flottant b { font: 900 18px var(--f-titre); color: var(--or-fonce); }
+.flottant span { font-size: 13px; color: var(--gris); }
+.flottant.f1 { left: -18px; bottom: 26px; }
+.flottant.f2 { right: -14px; top: 22px; animation-delay: -2.5s; }
+@keyframes flotte { 50% { transform: translateY(-8px); } }
+.offres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.offre { background: var(--fond-2); display: flex; flex-direction: column; overflow: hidden; transition: transform .3s, box-shadow .3s; min-width: 0; }
+.offre:hover { transform: translateY(-6px); box-shadow: 0 24px 40px -26px rgba(0,0,0,.5); }
+.offre img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #fff; }
+.offre .corps-o { padding: 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.offre h3 { font-size: 26px; font-weight: 900; }
+.offre ul { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 6px; }
+.offre li::before { content: "✓"; color: var(--or-fonce); font-weight: 800; margin-right: 8px; }
+.offre .btn { margin-top: auto; align-self: flex-start; }
+.offre.vedette { outline: 3px solid var(--or); }
+.bande-or { background: var(--or); color: var(--sur-or); padding-block: 48px; margin-top: 64px; }
+.bande-or .tete h2 em { color: var(--sur-or); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; }
+.mini-formules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.mini-formules a { background: var(--sur-or); color: #f5f3ee; padding: 20px; text-decoration: none; display: grid; gap: 4px; transition: transform .25s; }
+.mini-formules a:hover { transform: translateY(-4px); }
+.mini-formules b { font: 900 24px var(--f-titre); color: #f0a91c; }
+.mini-formules span { font-size: 15px; color: #ddd7cb; }
+.cibles { display: grid; grid-template-columns: repeat(5, 1fr); border-block: 2px solid var(--encre); }
+.cibles div { padding: 20px 16px; border-left: 1px solid var(--filet); display: grid; gap: 6px; }
+.cibles div:first-child { border-left: 0; }
+.cibles b { font: 800 19px var(--f-titre); }
+.cibles span { color: var(--gris); font-size: 15px; }
+.faq { display: grid; gap: 0; border-top: 2px solid var(--encre); }
+.faq details { border-bottom: 1px solid var(--filet); }
+.faq summary { cursor: pointer; padding: 18px 0; font: 700 18px var(--f-titre); list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::after { content: "+"; color: var(--or-fonce); font-size: 24px; line-height: 1; transition: transform .3s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq p { margin: 0 0 18px; color: var(--gris); max-width: 70ch; }
+.final { background: var(--nuit); color: #f5f3ee; margin-top: 72px; }
+.final .wrap { padding-block: 64px; display: grid; gap: 24px; }
+.final h2 { font-size: clamp(34px, 5.5vw, 72px); font-weight: 900; font-stretch: 108%; line-height: .95; letter-spacing: -.025em; max-width: 18ch; }
+.final h2 em { font-style: normal; color: #f0a91c; }
+.final .ligne { color: #f5f3ee; }
+
+/* curseur avant / après */
+.compare { position: relative; overflow: hidden; aspect-ratio: 16 / 8; background: #fff; user-select: none; touch-action: none; cursor: ew-resize; }
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.compare .avant { clip-path: inset(0 calc(100% - var(--p, 50%)) 0 0); }
+.compare .poignee { position: absolute; top: 0; bottom: 0; left: var(--p, 50%); width: 3px; background: var(--or); transform: translateX(-50%); }
+.compare .poignee::after { content: "◀ ▶"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--or); color: #141413; font: 800 13px var(--f-titre); padding: 10px 12px; border-radius: 999px; white-space: nowrap; }
+.compare .tag { position: absolute; top: 12px; background: rgba(20,20,19,.85); color: #f5f3ee; font: 500 12px var(--f-cote); padding: 5px 10px; letter-spacing: .06em; }
+.compare .tag.g { left: 12px; } .compare .tag.d { right: 12px; }
+.compare input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: ew-resize; }
+
+/* cartes de pôles et offres */
+.poles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.pole { position: relative; background: var(--fond-2); padding: 24px; display: flex; flex-direction: column; gap: 10px; text-decoration: none; overflow: hidden; transition: transform .35s, background .35s, color .35s; min-height: 280px; }
+.pole .n { font: 900 54px/1 var(--f-titre); color: var(--or-fonce); }
+.pole h3 { font-size: 23px; font-stretch: 105%; line-height: 1.1; }
+.pole p { margin: 0; color: var(--gris); font-size: 15px; transition: color .35s; }
+.pole ul { margin: 0; padding-left: 18px; color: var(--gris); font-size: 15px; transition: color .35s; }
+.pole .plus { margin-top: auto; font-weight: 700; color: var(--or-fonce); }
+.pole:hover { transform: translateY(-6px); background: var(--encre); color: var(--fond); }
+.pole:hover p, .pole:hover ul { color: var(--fond); }
+.pole:hover .n, .pole:hover .plus { color: var(--or); }
+
+.chiffres { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 2px solid var(--encre); }
+.chiffres div { padding: 22px 18px; border-left: 1px solid var(--filet); }
+.chiffres div:first-child { border-left: 0; }
+.chiffres b { display: block; font: 900 clamp(38px, 5vw, 62px)/1 var(--f-titre); font-stretch: 110%; }
+.chiffres span { color: var(--gris); font-size: 15px; }
+
+.appel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.appel a { position: relative; overflow: hidden; display: grid; align-content: end; gap: 8px; min-height: 300px; padding: 26px; text-decoration: none; color: #f5f3ee; background: var(--nuit); }
+.appel a img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; transition: transform .8s, opacity .4s; }
+.appel a:hover img { transform: scale(1.06); opacity: .3; }
+.appel a > * { position: relative; }
+.appel h3 { font-size: clamp(26px, 3vw, 38px); font-weight: 900; line-height: 1; }
+.appel p { margin: 0; color: #ddd7cb; max-width: 40ch; }
+.appel .btn { justify-self: start; margin-top: 8px; }
+
+/* réalisations */
+.filtres { display: flex; flex-wrap: wrap; gap: 8px; }
+.filtres button { font: 600 14px var(--f-texte); color: var(--encre); background: transparent; border: 1.5px solid var(--encre); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.filtres button[aria-pressed="true"] { background: var(--encre); color: var(--fond); }
+.grille { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+.carte { grid-column: span 4; position: relative; overflow: hidden; text-decoration: none; background: var(--nuit); color: #f5f3ee; aspect-ratio: 4 / 3.2; min-width: 0; }
+.carte.grand { grid-column: span 8; grid-row: span 2; aspect-ratio: auto; }
+.carte img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.carte::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(10,10,9,.88) 0%, rgba(10,10,9,.1) 60%, transparent 78%); }
+.carte .info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px 18px; display: grid; gap: 4px; }
+.carte .info .num { font: 900 14px var(--f-titre); color: #f0a91c; }
+.carte .info h3 { font-size: clamp(19px, 2vw, 25px); font-stretch: 105%; line-height: 1.05; }
+.carte .info p { margin: 0; font-size: 14px; color: #ddd7cb; max-height: 0; overflow: hidden; transition: max-height .45s; }
+.carte .voir { position: absolute; right: 14px; top: 14px; z-index: 2; background: #f0a91c; color: #141413; font: 700 13px var(--f-texte); border-radius: 999px; padding: 6px 12px; transform: translateY(-260%); transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+.carte:hover img, .carte:focus-visible img { transform: scale(1.07); }
+.carte:hover .info p, .carte:focus-visible .info p { max-height: 4.5em; }
+.carte:hover .voir, .carte:focus-visible .voir { transform: none; }
+.carte.cache { display: none; }
+
+/* méthode */
+.methode { display: grid; grid-template-columns: repeat(4, 1fr); }
+.etape { padding: 22px 22px 0 0; border-top: 2px solid var(--encre); position: relative; }
+.etape::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--or); }
+.etape h3 { font-size: 21px; margin: 6px 0; }
+.etape p { margin: 0; color: var(--gris); font-size: 15px; max-width: 30ch; }
+
+/* assistance : formules */
+.formules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.formule { border: 1.5px solid var(--filet); padding: 22px; display: flex; flex-direction: column; gap: 8px; background: var(--fond); transition: border-color .25s, transform .25s; }
+.formule:hover { border-color: var(--or); transform: translateY(-4px); }
+.formule .duree { font: 900 30px/1 var(--f-titre); font-stretch: 110%; }
+.formule .duree small { display: block; font: 500 12px var(--f-cote); letter-spacing: .07em; text-transform: uppercase; color: var(--or-fonce); margin-bottom: 6px; }
+.formule p { margin: 0; color: var(--gris); font-size: 15px; }
+.formule .btn { margin-top: auto; justify-self: start; align-self: flex-start; padding: 9px 16px; font-size: 14px; }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-block: 2px solid var(--encre); margin-top: 28px; }
+.modes div { padding: 18px; border-left: 1px solid var(--filet); }
+.modes div:first-child { border-left: 0; }
+.modes h3 { font-size: 20px; margin-bottom: 4px; }
+.modes p { margin: 0; color: var(--gris); font-size: 15px; }
+
+/* demande */
+.onglets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.onglets button { font: 700 15px var(--f-texte); border: 1.5px solid var(--encre); background: transparent; color: var(--encre); border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+.onglets button[aria-selected="true"] { background: var(--encre); color: var(--fond); }
+.demande { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+form.f { display: grid; gap: 14px; }
+form.f fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+form.f legend, form.f label.t { font: 500 12px var(--f-cote); letter-spacing: .07em; text-transform: uppercase; color: var(--gris); padding: 0; margin-bottom: 2px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.champ { display: grid; gap: 6px; min-width: 0; }
+form.f input[type=text], form.f input[type=tel], form.f input[type=email], form.f input[type=date], form.f input[type=number], form.f select, form.f textarea { font: 400 16px var(--f-texte); color: var(--encre); background: var(--fond); border: 1.5px solid var(--filet); border-radius: 8px; padding: 11px 12px; width: 100%; }
+form.f input:focus, form.f select:focus, form.f textarea:focus { border-color: var(--or); outline: none; }
+.puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.puces label { position: relative; }
+.puces input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.puces span { display: inline-block; border: 1.5px solid var(--filet); border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s; }
+.puces input:checked + span { background: var(--or); border-color: var(--or); color: var(--sur-or); }
+.puces input:focus-visible + span { outline: 2px solid var(--or); outline-offset: 2px; }
+.err { color: #c0392b; font-weight: 600; font-size: 14px; min-height: 1em; }
+.resume { position: sticky; top: 90px; background: var(--nuit); color: #f5f3ee; padding: 24px; display: grid; gap: 14px; }
+.resume h3 { font-size: 24px; }
+.resume pre { margin: 0; white-space: pre-wrap; font: 400 14px/1.55 var(--f-texte); background: rgba(255,255,255,.06); padding: 14px; max-height: 340px; overflow: auto; }
+.resume .envoi { display: grid; gap: 8px; }
+.resume .envoi a, .resume .envoi button { justify-content: center; }
+.resume .ok { color: #f0a91c; font-weight: 600; }
+.resume .note { font-size: 13px; color: #c9c3b8; margin: 0; }
+
+/* contact / pied */
+.contact { background: var(--nuit); color: #f5f3ee; }
+.contact .wrap { padding-block: 48px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; }
+.contact h2 { font-size: clamp(38px, 6vw, 80px); font-weight: 900; font-stretch: 115%; line-height: .9; letter-spacing: -.03em; }
+.contact h2 span { color: #f0a91c; }
+.coord .l { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid rgba(245,243,238,.2); padding-block: 12px; }
+.coord .v { font: 600 clamp(17px, 2vw, 21px) var(--f-texte); user-select: all; overflow-wrap: anywhere; min-width: 0; }
+.coord .k { display: block; font: 500 11px var(--f-cote); letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+.copier { font: 700 13px var(--f-texte); background: #f0a91c; color: #141413; border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+footer { background: var(--nuit); color: #f5f3ee; border-top: 1px solid rgba(245,243,238,.15); }
+footer .wrap { padding-block: 18px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; opacity: .8; }
+
+/* fiche projet */
+.fiche { position: fixed; inset: 0; z-index: 40; background: var(--fond); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+.fiche .barre { position: sticky; top: 0; z-index: 3; background: var(--fond); border-bottom: 1px solid var(--filet); padding-top: env(safe-area-inset-top, 0px); }
+.fiche .barre .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 10px; }
+.fiche .barre a { font-weight: 600; text-decoration: none; }
+.fiche .barre .np { display: flex; gap: 16px; }
+.viewer { position: relative; background: #0d0d0c; }
+.viewer img { width: 100%; height: min(72vh, 760px); object-fit: contain; animation: apparait .5s ease; }
+@keyframes apparait { from { opacity: .3; transform: scale(.985); } to { opacity: 1; transform: none; } }
+.viewer button.fl { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: 0; background: #f0a91c; color: #141413; font: 800 22px var(--f-titre); cursor: pointer; }
+.viewer .g { left: max(12px, env(safe-area-inset-left, 0px)); } .viewer .d { right: max(12px, env(safe-area-inset-right, 0px)); }
+.viewer .leg { position: absolute; left: 0; bottom: 0; background: rgba(13,13,12,.85); color: #f2efe8; padding: 8px 14px; font-size: 14px; max-width: 100%; }
+.vignettes { display: flex; gap: 8px; overflow-x: auto; padding-block: 10px; }
+.vignettes button { flex: 0 0 auto; width: 96px; height: 64px; padding: 0; border: 2px solid transparent; background: var(--fond-2); cursor: pointer; opacity: .6; }
+.vignettes button.on { border-color: var(--or); opacity: 1; }
+.vignettes img { width: 100%; height: 100%; object-fit: cover; }
+.fiche .entete { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 26px; align-items: end; padding-block: 26px 18px; }
+.fiche .gros { font: 900 clamp(76px, 12vw, 150px)/.78 var(--f-titre); color: var(--or-fonce); letter-spacing: -.04em; }
+.fiche h2 { font-size: clamp(32px, 5vw, 60px); font-weight: 900; font-stretch: 108%; line-height: .95; overflow-wrap: anywhere; }
+.fiche .sous { color: var(--gris); font-style: italic; margin: 8px 0 0; font-size: 18px; }
+.fiche .corps { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 36px; border-top: 3px solid var(--or); padding-block: 22px 70px; }
+.fiche .corps p { margin: 0 0 14px; font-size: 17px; max-width: 64ch; }
+.fiche .cart { background: var(--fond-2); padding: 18px; align-self: start; display: grid; gap: 12px; min-width: 0; }
+
+@media (max-width: 1000px) {
+  .h2o .wrap, .offres { grid-template-columns: 1fr; }
+  .mini-formules { grid-template-columns: repeat(2, 1fr); }
+  .cibles { grid-template-columns: 1fr 1fr; } .cibles div { border-left: 0; border-top: 1px solid var(--filet); } .cibles div:first-child, .cibles div:nth-child(2) { border-top: 0; }
+  .flottant.f1 { left: 10px; } .flottant.f2 { right: 10px; }
+  .formules { grid-template-columns: repeat(2, 1fr); }
+  .poles, .methode, .modes { grid-template-columns: 1fr; row-gap: 18px; }
+  .modes div { border-left: 0; border-top: 1px solid var(--filet); } .modes div:first-child { border-top: 0; }
+  .chiffres { grid-template-columns: repeat(2, 1fr); } .chiffres div:nth-child(3) { border-left: 0; }
+  .appel, .contact .wrap, .fiche .corps, .demande { grid-template-columns: 1fr; }
+  .carte, .carte.grand { grid-column: span 6; grid-row: auto; aspect-ratio: 4 / 3.2; }
+  .resume { position: static; }
+}
+@media (max-width: 760px) {
+  .mini-formules, .cibles { grid-template-columns: 1fr; } .cibles div:nth-child(2) { border-top: 1px solid var(--filet); }
+  .burger { display: inline-block; }
+  nav.menu { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--fond); border-bottom: 1px solid var(--filet); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); flex-direction: column; align-items: stretch; }
+  nav.menu.ouvert { display: flex; }
+  .formules, .duo { grid-template-columns: 1fr; }
+  .carte, .carte.grand { grid-column: span 12; }
+  .carte .info p { max-height: none; }
+  .fiche .entete { grid-template-columns: 1fr; }
+  .viewer img { height: 52vh; }
+  .compare { aspect-ratio: 4 / 3; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .hero .diapo img.on { opacity: .58; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="marque" href="#accueil"><img src="img/logo_lf.webp" alt="Logo Le Freelancer"><span><b>Le</b> Freelancer</span></a>
+    <button class="burger" type="button" id="burger" aria-expanded="false" aria-controls="menu">Menu</button>
+    <nav class="menu" id="menu" aria-label="Pages">
+      <a href="#accueil">Accueil</a><a href="#services">Services</a><a href="#realisations">Réalisations</a><a href="#assistance">Assistance entreprises</a><a class="cta" href="#demande">Demander un devis</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= ACCUEIL ================= -->
+<div class="vue" id="v-accueil" data-vue="accueil">
+  <section class="h2o"><div class="wrap">
+    <div class="h2o-texte">
+      <span class="badge-pro">Pour les entreprises du BTP, bureaux d’études, architectes et particuliers</span>
+      <h1>Plans, 3D et assistance chantier, <em>livrés dans vos délais.</em></h1>
+      <p>Le Freelancer renforce votre production : plans cotés, maquettes 3D, rendus qui font signer vos clients, et renfort d’équipe à la semaine, au mois ou en CDD.</p>
+      <div class="h2o-cta">
+        <a class="btn gros" href="#demande">Demander un devis <span class="fl">→</span></a>
+        <a class="btn ligne gros" href="#assistance">Demander une assistance</a>
+      </div>
+      <ul class="garanties">
+        <li>Devis sur mesure, sans engagement</li>
+        <li>2 séries de corrections incluses</li>
+        <li>À distance ou sur site</li>
+      </ul>
+    </div>
+    <div class="h2o-vis">
+      <img src="img/u_hero.jpg" alt="Rendu 3D d’une unité de transformation céréalière et de son jardin">
+      <div class="flottant f1"><b>Rendu 3D</b><span>Vue aérienne photoréaliste</span></div>
+      <div class="flottant f2"><b>15 projets</b><span>au portfolio</span></div>
+    </div>
+  </div></section>
+  <div class="defile" aria-hidden="true"><div class="piste" id="piste"></div></div>
+
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Que <em>cherchez-vous</em> ?</h2><p>Choisissez votre besoin : chaque offre se termine par un devis adapté à votre projet.</p></div>
+    <div class="offres">
+      <article class="offre">
+        <img src="img/u_plan.jpg" alt="" loading="lazy">
+        <div class="corps-o"><span class="cote">Pôle 01</span><h3>Plans et DAO</h3>
+          <ul><li>Mise au propre de plans</li><li>Plans cotés, coupes, façades</li><li>Plans de toiture et de masse</li><li>Dossiers graphiques et d’exécution</li></ul>
+          <a class="btn" href="#demande" data-devis="Plans et DAO">Devis plans →</a></div>
+      </article>
+      <article class="offre vedette">
+        <img src="img/km_sejour.jpg" alt="" loading="lazy">
+        <div class="corps-o"><span class="cote">Pôle 02 · le plus demandé</span><h3>3D et rendus</h3>
+          <ul><li>Maquette numérique</li><li>Rendus extérieurs et intérieurs</li><li>Vues aériennes</li><li>Animations et films de projet</li></ul>
+          <a class="btn" href="#demande" data-devis="Rendus photoréalistes">Devis 3D →</a></div>
+      </article>
+      <article class="offre">
+        <img src="img/skn_jour.jpg" alt="" loading="lazy">
+        <div class="corps-o"><span class="cote">Pôle 03</span><h3>Assistance BTP</h3>
+          <ul><li>Renfort d’équipe ponctuel</li><li>Visites et reportages photo</li><li>Comptes rendus de chantier</li><li>Suivi visuel de l’avancement</li></ul>
+          <a class="btn" href="#assistance">Voir les formules →</a></div>
+      </article>
+    </div>
+  </div></section>
+
+  <section class="bloc bande-or"><div class="wrap">
+    <div class="tete"><h2>Un renfort pour <em>votre équipe</em></h2><a class="btn noir" href="#assistance">Toutes les formules →</a></div>
+    <div class="mini-formules">
+      <a href="#demande" data-pre="semaine"><b>1 semaine</b><span>Boucler un dossier urgent</span></a>
+      <a href="#demande" data-pre="mois"><b>1 mois</b><span>Passer une période de charge</span></a>
+      <a href="#demande" data-pre="cdd"><b>CDD</b><span>Un projet, une saison de chantiers</span></a>
+      <a href="#demande" data-pre="chantier"><b>Suivi de chantier</b><span>Visites, photos, comptes rendus</span></a>
+    </div>
+  </div></section>
+
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Vos plans deviennent <em>des images qui vendent</em></h2><p>Faites glisser le curseur : du plan d’aménagement au rendu 3D présenté à vos clients.</p></div>
+    <div class="compare" id="compare" style="--p:50%">
+      <img src="img/u_aerien.jpg" alt="Rendu 3D du projet">
+      <img class="avant" src="img/u_plan.jpg" alt="Plan d’aménagement du projet">
+      <span class="tag g">VOTRE PLAN</span><span class="tag d">NOTRE RENDU 3D</span>
+      <div class="poignee"></div>
+      <input type="range" min="0" max="100" value="50" id="compare-r" aria-label="Comparer le plan et le rendu">
+    </div>
+  </div></section>
+
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Ils peuvent <em>compter sur nous</em></h2></div>
+    <div class="cibles">
+      <div><b>Entreprises de BTP</b><span>Plans, rendus pour vos appels d’offres et suivi photo de vos chantiers.</span></div>
+      <div><b>Bureaux d’études</b><span>Renfort DAO et maquette 3D en période de charge.</span></div>
+      <div><b>Architectes</b><span>Mise au propre, dossiers graphiques et visuels de présentation.</span></div>
+      <div><b>Promoteurs</b><span>Perspectives et animations pour vendre sur plan.</span></div>
+      <div><b>Particuliers</b><span>Les plans et les images de votre future maison.</span></div>
+    </div>
+  </div></section>
+
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Des projets <em>déjà réalisés</em></h2><a class="btn ligne" href="#realisations">Voir les 15 projets →</a></div>
+    <div class="grille" id="grille-accueil"></div>
+  </div></section>
+
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Simple, <em>en 4 étapes</em></h2></div>
+    <div class="methode">
+      <div class="etape"><span class="cote">Étape 1</span><h3>Vous demandez</h3><p>Formulaire, WhatsApp ou e-mail : envoyez vos plans ou votre idée.</p></div>
+      <div class="etape"><span class="cote">Étape 2</span><h3>Nous chiffrons</h3><p>Un devis clair selon la complexité, les délais et les livrables.</p></div>
+      <div class="etape"><span class="cote">Étape 3</span><h3>Nous produisons</h3><p>Avec deux séries de corrections incluses dans le périmètre convenu.</p></div>
+      <div class="etape"><span class="cote">Étape 4</span><h3>Vous recevez</h3><p>Les fichiers finaux, prêts pour votre client ou votre chantier.</p></div>
+    </div>
+  </div></section>
+
+  <section class="bloc"><div class="wrap faq-wrap">
+    <div class="tete" style="display:block"><h2>Questions <em>fréquentes</em></h2></div>
+    <div class="faq">
+      <details><summary>Travaillez-vous uniquement au Burkina Faso ?</summary><p>Non. Plans, 3D et rendus se font à distance pour des clients au Burkina Faso et à l’international. Les visites et l’assistance en présentiel se font sur site.</p></details>
+      <details><summary>Combien coûte une prestation ?</summary><p>Chaque projet est chiffré sur devis, selon la surface, la complexité, les délais et les livrables. Les entreprises partenaires et les commandes régulières bénéficient de conditions dédiées.</p></details>
+      <details><summary>Comment se passe le paiement ?</summary><p>Un acompte au démarrage, puis le solde avant la livraison des fichiers finaux.</p></details>
+      <details><summary>Combien de corrections sont prévues ?</summary><p>Deux séries de corrections sont incluses dans le périmètre convenu. Au-delà, elles sont chiffrées à part.</p></details>
+      <details><summary>Pouvez-vous rejoindre notre équipe pour une période ?</summary><p>Oui : une semaine, un mois ou un CDD, à distance, en présentiel ou en mode mixte. Voir la page Assistance entreprises.</p></details>
+      <details><summary>Recevons-nous les fichiers sources ?</summary><p>Oui si c’est prévu au devis : les fichiers modifiables sont inclus ou facturés selon la mission.</p></details>
+    </div>
+  </div></section>
+
+  <section class="final"><div class="wrap">
+    <h2>Votre prochain projet commence <em>par un message.</em></h2>
+    <div class="h2o-cta"><a class="btn gros" href="#demande">Demander un devis →</a><a class="btn ligne gros" href="https://wa.me/22664183326" target="_blank" rel="noopener">Écrire sur WhatsApp</a></div>
+  </div></section>
+</div>
+
+<!-- ================= SERVICES ================= -->
+<div class="vue" id="v-services" data-vue="services" hidden>
+  <div class="wrap page-titre"><span class="cote">Services</span><h1>Ce que nous <em>produisons</em></h1><p>Une structure indépendante qui renforce la production des professionnels du BTP et accompagne les particuliers, du plan coté au rapport de chantier.</p></div>
+  <section class="bloc"><div class="wrap">
+    <div class="poles">
+      <div class="pole"><span class="n">01</span><h3>Architecture et DAO</h3><ul><li>Mise au propre de plans</li><li>Plans architecturaux cotés</li><li>Coupes et façades</li><li>Plans de toiture et plans de masse</li><li>Dossiers graphiques et plans d’exécution</li></ul><a class="btn" href="#demande" style="margin-top:auto; align-self:flex-start">Demander un devis</a></div>
+      <div class="pole"><span class="n">02</span><h3>Modélisation 3D et visualisation</h3><ul><li>Maquette numérique</li><li>Rendus photoréalistes extérieurs et intérieurs</li><li>Vues aériennes</li><li>Animations et films architecturaux</li><li>Planches de présentation</li></ul><a class="btn" href="#demande" style="margin-top:auto; align-self:flex-start">Demander un devis</a></div>
+      <div class="pole"><span class="n">03</span><h3>Assistance technique BTP</h3><ul><li>Visites de chantier</li><li>Reportages photo de l’avancement</li><li>Comptes rendus de visite</li><li>Suivi visuel des travaux</li><li>Signalement des écarts apparents</li></ul><a class="btn" href="#assistance" style="margin-top:auto; align-self:flex-start">Voir les formules</a></div>
+    </div>
+  </div></section>
+  <section class="bloc"><div class="wrap">
+    <div class="tete"><h2>Comment nous <em>travaillons</em></h2><p>Quatre étapes claires, de votre demande à la livraison.</p></div>
+    <div class="methode">
+      <div class="etape"><span class="cote">Étape 1</span><h3>Votre demande</h3><p>Vous envoyez plans, croquis ou besoins ; nous échangeons à distance ou sur site.</p></div>
+      <div class="etape"><span class="cote">Étape 2</span><h3>Le devis</h3><p>Un devis selon la complexité, les délais et les livrables, puis un acompte au démarrage.</p></div>
+      <div class="etape"><span class="cote">Étape 3</span><h3>La production</h3><p>Plans, maquette, rendus ou visites, avec deux séries de corrections incluses.</p></div>
+      <div class="etape"><span class="cote">Étape 4</span><h3>La livraison</h3><p>Fichiers finaux remis après le solde ; fichiers sources selon le devis.</p></div>
+    </div>
+  </div></section>
+</div>
+
+<!-- ================= RÉALISATIONS ================= -->
+<div class="vue" id="v-realisations" data-vue="realisations" hidden>
+  <div class="wrap page-titre"><span class="cote">Portfolio</span><h1>Nos <em>réalisations</em></h1><p>Industrie, habitat, équipements et projets urbains : cliquez sur un projet pour voir ses images, ses plans et sa démarche.</p></div>
+  <section class="bloc"><div class="wrap">
+    <div class="tete" style="justify-content:flex-start">
+      <div class="filtres" role="group" aria-label="Filtrer les réalisations">
+        <button type="button" data-f="tous" aria-pressed="true">Tout</button><button type="button" data-f="industrie" aria-pressed="false">Industrie</button><button type="button" data-f="habitat" aria-pressed="false">Habitat</button><button type="button" data-f="equipement" aria-pressed="false">Équipement</button><button type="button" data-f="ville" aria-pressed="false">Ville</button>
+      </div>
+    </div>
+    <div class="grille" id="grille"></div>
+  </div></section>
+</div>
+
+<!-- ================= ASSISTANCE ================= -->
+<div class="vue" id="v-assistance" data-vue="assistance" hidden>
+  <div class="wrap page-titre"><span class="cote">Entreprises et bureaux d’études</span><h1>Un renfort <em>technique</em>, quand vous en avez besoin</h1><p>Une période de charge, un dossier urgent, un chantier à suivre : nous rejoignons votre équipe pour la durée qu’il vous faut, à distance ou dans vos locaux.</p></div>
+  <section class="bloc"><div class="wrap">
+    <div class="formules">
+      <div class="formule"><span class="duree"><small>Ponctuel</small>1 semaine</span><p>Un renfort court pour boucler un dossier, des plans ou une série de rendus.</p><a class="btn" href="#demande" data-pre="semaine">Choisir</a></div>
+      <div class="formule"><span class="duree"><small>Période de charge</small>1 mois</span><p>Un mois de production DAO et 3D intégrée à votre équipe et à vos délais.</p><a class="btn" href="#demande" data-pre="mois">Choisir</a></div>
+      <div class="formule"><span class="duree"><small>Durée définie</small>CDD</span><p>Un contrat à durée déterminée pour un projet ou une saison de chantiers.</p><a class="btn" href="#demande" data-pre="cdd">Choisir</a></div>
+      <div class="formule"><span class="duree"><small>Sur le terrain</small>Suivi de chantier</span><p>Visites, reportages photo, comptes rendus et suivi visuel de l’avancement.</p><a class="btn" href="#demande" data-pre="chantier">Choisir</a></div>
+    </div>
+    <div class="modes">
+      <div><h3>À distance</h3><p>Échanges en ligne, fichiers partagés, livraisons selon votre planning.</p></div>
+      <div><h3>En présentiel</h3><p>Dans vos bureaux ou sur vos chantiers, selon les besoins de l’équipe.</p></div>
+      <div><h3>Mixte</h3><p>Production à distance et présence sur site pour les réunions et visites.</p></div>
+    </div>
+    <p style="color:var(--gris); max-width:70ch; margin-top:24px">Tarifs sur devis selon la durée, le mode et les tâches. Conditions dédiées pour les entreprises partenaires et les commandes régulières.</p>
+    <a class="btn" href="#demande" data-pre="semaine" style="margin-top:8px">Demander une assistance →</a>
+  </div></section>
+</div>
+
+<!-- ================= DEMANDE ================= -->
+<div class="vue" id="v-demande" data-vue="demande" hidden>
+  <div class="wrap page-titre"><span class="cote">Demande</span><h1>Parlons de votre <em>besoin</em></h1><p>Remplissez le formulaire : votre demande est résumée automatiquement, puis envoyée en un clic à Le Freelancer, ou par Gmail et WhatsApp si vous préférez.</p></div>
+  <section class="bloc"><div class="wrap">
+    <div class="onglets" role="tablist" aria-label="Type de demande">
+      <button type="button" role="tab" id="tab-devis" aria-selected="true" aria-controls="form-devis">Devis pour un projet</button>
+      <button type="button" role="tab" id="tab-assist" aria-selected="false" aria-controls="form-assist">Assistance pour une entreprise</button>
+    </div>
+    <div class="demande">
+      <div>
+        <form class="f" id="form-devis" role="tabpanel" aria-labelledby="tab-devis" novalidate>
+          <fieldset><legend>Prestations souhaitées</legend>
+            <div class="puces" id="d-prest">
+              <label><input type="checkbox" value="Plans et DAO"><span>Plans et DAO</span></label>
+              <label><input type="checkbox" value="Modélisation 3D"><span>Modélisation 3D</span></label>
+              <label><input type="checkbox" value="Rendus photoréalistes"><span>Rendus photoréalistes</span></label>
+              <label><input type="checkbox" value="Animation / film"><span>Animation / film</span></label>
+              <label><input type="checkbox" value="Dossier graphique"><span>Dossier graphique</span></label>
+              <label><input type="checkbox" value="Visite de chantier"><span>Visite de chantier</span></label>
+            </div>
+          </fieldset>
+          <div class="duo">
+            <div class="champ"><label class="t" for="d-type">Type de projet</label><select id="d-type"><option>Maison individuelle</option><option>Immeuble / R+N</option><option>Commerce ou bureau</option><option>Équipement public</option><option>Bâtiment industriel</option><option>Autre</option></select></div>
+            <div class="champ"><label class="t" for="d-surf">Surface approximative (m²)</label><input id="d-surf" type="number" min="0" inputmode="numeric" placeholder="Ex. : 180"></div>
+          </div>
+          <div class="duo">
+            <div class="champ"><label class="t" for="d-lieu">Lieu du projet</label><input id="d-lieu" type="text" placeholder="Ex. : Ouagadougou"></div>
+            <div class="champ"><label class="t" for="d-delai">Délai souhaité</label><select id="d-delai"><option>Sans urgence</option><option>Sous 2 semaines</option><option>Sous 1 semaine</option><option>Urgent (quelques jours)</option></select></div>
+          </div>
+          <div class="champ"><label class="t" for="d-docs">Documents disponibles</label><select id="d-docs"><option>Croquis ou idée seulement</option><option>Plans papier à mettre au propre</option><option>Plans numériques (DWG, PDF)</option><option>Maquette 3D existante</option></select></div>
+          <div class="champ"><label class="t" for="d-msg">Votre besoin en quelques mots</label><textarea id="d-msg" rows="3" placeholder="Nombre de vues, style souhaité, contraintes…"></textarea></div>
+          <div class="duo">
+            <div class="champ"><label class="t" for="d-nom">Nom ou entreprise *</label><input id="d-nom" type="text" autocomplete="organization" required></div>
+            <div class="champ"><label class="t" for="d-tel">Téléphone ou WhatsApp *</label><input id="d-tel" type="tel" autocomplete="tel" required placeholder="+226 …"></div>
+          </div>
+          <div class="champ"><label class="t" for="d-mail">E-mail</label><input id="d-mail" type="email" autocomplete="email"></div>
+          <p class="err" id="d-err" aria-live="polite"></p>
+          <button class="btn" type="submit" style="justify-self:start">Résumer ma demande →</button>
+        </form>
+
+        <form class="f" id="form-assist" role="tabpanel" aria-labelledby="tab-assist" novalidate hidden>
+          <fieldset><legend>Formule</legend>
+            <div class="puces" id="a-form">
+              <label><input type="radio" name="a-form" value="Renfort d’une semaine" data-k="semaine" checked><span>1 semaine</span></label>
+              <label><input type="radio" name="a-form" value="Renfort d’un mois" data-k="mois"><span>1 mois</span></label>
+              <label><input type="radio" name="a-form" value="CDD" data-k="cdd"><span>CDD</span></label>
+              <label><input type="radio" name="a-form" value="Suivi de chantier" data-k="chantier"><span>Suivi de chantier</span></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>Mode</legend>
+            <div class="puces">
+              <label><input type="radio" name="a-mode" value="À distance" checked><span>À distance</span></label>
+              <label><input type="radio" name="a-mode" value="En présentiel"><span>En présentiel</span></label>
+              <label><input type="radio" name="a-mode" value="Mixte"><span>Mixte</span></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>Tâches attendues</legend>
+            <div class="puces" id="a-taches">
+              <label><input type="checkbox" value="DAO / plans"><span>DAO / plans</span></label>
+              <label><input type="checkbox" value="Modélisation 3D"><span>Modélisation 3D</span></label>
+              <label><input type="checkbox" value="Rendus"><span>Rendus</span></label>
+              <label><input type="checkbox" value="Visites de chantier"><span>Visites de chantier</span></label>
+              <label><input type="checkbox" value="Reportages photo"><span>Reportages photo</span></label>
+              <label><input type="checkbox" value="Comptes rendus"><span>Comptes rendus</span></label>
+            </div>
+          </fieldset>
+          <div class="duo">
+            <div class="champ"><label class="t" for="a-debut">Date de début souhaitée</label><input id="a-debut" type="date"></div>
+            <div class="champ" id="a-duree-c" hidden><label class="t" for="a-duree">Durée du CDD (mois)</label><input id="a-duree" type="number" min="1" max="36" inputmode="numeric" placeholder="Ex. : 6"></div>
+            <div class="champ" id="a-vis-c" hidden><label class="t" for="a-vis">Fréquence des visites</label><select id="a-vis"><option>1 visite par semaine</option><option>2 visites par semaine</option><option>1 visite toutes les 2 semaines</option><option>À définir ensemble</option></select></div>
+          </div>
+          <div class="champ"><label class="t" for="a-lieu">Lieu (bureaux ou chantier)</label><input id="a-lieu" type="text" placeholder="Ex. : Ouagadougou, Ouaga 2000"></div>
+          <div class="champ"><label class="t" for="a-msg">Précisions</label><textarea id="a-msg" rows="3" placeholder="Projet concerné, logiciels utilisés, horaires…"></textarea></div>
+          <div class="duo">
+            <div class="champ"><label class="t" for="a-ent">Entreprise *</label><input id="a-ent" type="text" autocomplete="organization" required></div>
+            <div class="champ"><label class="t" for="a-pers">Personne à contacter</label><input id="a-pers" type="text" autocomplete="name"></div>
+          </div>
+          <div class="duo">
+            <div class="champ"><label class="t" for="a-tel">Téléphone ou WhatsApp *</label><input id="a-tel" type="tel" autocomplete="tel" required placeholder="+226 …"></div>
+            <div class="champ"><label class="t" for="a-mail">E-mail</label><input id="a-mail" type="email" autocomplete="email"></div>
+          </div>
+          <p class="err" id="a-err" aria-live="polite"></p>
+          <button class="btn" type="submit" style="justify-self:start">Résumer ma demande →</button>
+        </form>
+      </div>
+
+      <aside class="resume" aria-live="polite">
+        <span class="cote" style="color:#f0a91c">Résumé de votre demande</span>
+        <h3 id="r-titre">Votre résumé apparaîtra ici</h3>
+        <pre id="r-texte">Remplissez le formulaire puis cliquez sur « Résumer ma demande ».</pre>
+        <div class="envoi" id="r-envoi" hidden>
+          <button class="btn" type="button" id="r-direct">Envoyer ma demande</button>
+          <p class="ok" id="r-etat" aria-live="polite"></p>
+          <span class="cote" style="color:#c9c3b8">Ou par un autre moyen</span>
+          <a class="btn ligne" id="r-gmail" target="_blank" rel="noopener">Envoyer par Gmail</a>
+          <a class="btn ligne" id="r-wa" target="_blank" rel="noopener">Envoyer par WhatsApp</a>
+          <a class="btn ligne" id="r-mail">Autre messagerie</a>
+          <button class="btn ligne" type="button" id="r-copier">Copier le résumé</button>
+          <p class="note">« Envoyer ma demande » transmet directement votre demande à Le Freelancer. Vous pouvez aussi l’envoyer par Gmail, WhatsApp ou votre messagerie.</p>
+        </div>
+      </aside>
+    </div>
+  </div></section>
+</div>
+</main>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <h2>Un projet ?<br><span>Parlons-en.</span></h2>
+    <div class="coord">
+      <div class="l"><span><span class="k">Téléphone · WhatsApp</span><span class="v">+226 64 18 33 26</span></span><button class="copier" type="button" data-c="+226 64 18 33 26">Copier</button></div>
+      <div class="l"><span><span class="k">Téléphone</span><span class="v">+226 51 43 47 10</span></span><button class="copier" type="button" data-c="+226 51 43 47 10">Copier</button></div>
+      <div class="l"><span><span class="k">E-mail</span><span class="v">ephremdimitri@gmail.com</span></span><button class="copier" type="button" data-c="ephremdimitri@gmail.com">Copier</button></div>
+      <div class="l"><span><span class="k">Zone d’intervention</span><span class="v">Burkina Faso et international</span></span></div>
+    </div>
+  </div>
+</section>
+<footer><div class="wrap"><span>© 2026 Le Freelancer · Travailler • Créer • Réussir</span><span>Production architecturale, 3D et assistance BTP</span></div></footer>
+
+<div class="fiche" id="fiche" hidden role="dialog" aria-modal="true" aria-labelledby="f-titre"></div>
+
+<script>
+const EMAIL = "ephremdimitri@gmail.com", WA = "22664183326";
+const P = [
+  { id: "01", f: "industrie", g: true, t: "UniTraCe Koudougou", s: "Unité de transformation céréalière en briques de terre.", k: "Industrie agro-alimentaire", lieu: "Koudougou",
+    txt: ["Un <b>prototype semi-industriel reproductible</b> pour transformer le mil, le maïs, le sorgho et le riz, sur 3 250 m² pour 30 usagers.", "Depuis la rue, on voit de la terre et du végétal, pas un entrepôt. Une seule chaîne en marche avant évite tout croisement entre matière et personnel.", "Briques de terre comprimée, double peau en panneaux « sablier », plantes grimpantes et sheds ventilés : le confort sans climatisation."],
+    im: [["u_hero", "Vue aérienne"], ["u_aerien", "Trois blocs autour d’un jardin"], ["u_hall", "Le hall de malaxage"], ["u_boutique", "La boutique dans le jardin"], ["ua_petrir", "Pétrissage"], ["ua_sechage", "Séchage solaire et lavage"], ["ua_tamis", "Tamisage sous la double peau"], ["u_peau", "Façade végétale"], ["u_sechoir", "Le séchoir ombragé"], ["u_plan", "Plan d’aménagement"], ["u_coupe", "Coupe sur les sheds"]] },
+  { id: "02", f: "industrie", t: "YILGMDE", s: "Centre de tri et de transfert des ordures ménagères.", k: "Industrie · salubrité",
+    txt: ["Déchargement des collecteurs et quais de transfert séparés, structure ouverte et <b>ventilation naturelle constante</b> pour le confort des agents.", "Un parti <b>modulaire</b> et de larges toitures sans poteaux encombrants pour les engins."],
+    im: [["y_aerien", "Vue aérienne"], ["y_hero", "Quai de transfert"], ["y_diag", "Diagrammes de flux"]] },
+  { id: "03", f: "equipement", t: "Gayaéon", s: "Sanctuaire et dispensaire traditionnel, vision 2100.", k: "Prospectif · soin et culte",
+    txt: ["Un lieu de guérison et de recueillement porté par une <b>structure autoportante</b>, réalisée avec des méthodes de construction traditionnelles."],
+    im: [["g_1", "Sous la toiture autoportante"], ["g_2", "Les galeries suspendues"], ["g_3", "Le foyer de guérison"], ["g_6", "Le jardin intérieur"], ["g_5", "Éclaté de la structure"], ["g_sketch", "Squelette du projet"]] },
+  { id: "04", f: "habitat", t: "Bâtiment multifonctionnel", s: "Un F3 qui se transforme en bureau, et ses variantes bioclimatiques.", k: "Habitat et bureau",
+    txt: ["Un bâtiment qui passe du logement au bureau. Brique apparente, charpente métallique et arches en bois ; quatre variantes explorent la double pente, l’arche, le moucharabieh et les formes courbes."],
+    im: [["m_hero", "Brique, métal et arches en bois"], ["m_int", "Salle de réunion"], ["v_1", "Variante double pente"], ["v_2", "Variante arche"], ["v_4", "Variante moucharabieh"], ["v_5", "Variante courbe"], ["m_plan1", "Usage habitation"], ["m_plan2", "Usage bureaux"]] },
+  { id: "05", f: "habitat", t: "Loft en voûte nubienne", s: "La terre comme matériau du confort.", k: "Habitat · terre crue",
+    txt: ["Un studio ouvert sous voûte nubienne : l’épaisseur des murs garde la <b>fraîcheur naturelle</b>, l’éclairage zénithal révèle la courbure."],
+    im: [["l_3d2", "Façade aux arcs"], ["l_3d", "Le loft"], ["l_fac", "Façades"], ["l_coupe", "Coupe"]] },
+  { id: "06", f: "habitat", t: "Villa en voûte nubienne", s: "Le vernaculaire au niveau du luxe contemporain.", k: "Habitat",
+    txt: ["Une organisation en « L » autour d’un patio où <b>la piscine devient le cœur du projet</b>, avec un zonage thermique des pièces."],
+    im: [["n_cour", "Entrée"], ["n_jardin", "Jardin"], ["n_plan", "Plan aménagé"]] },
+  { id: "07", f: "ville", t: "Laboratoire national", s: "D’un bâtiment utilitaire à une architecture de référence.", k: "Réhabilitation",
+    txt: ["Une <b>toiture ondulée</b> sur structures en « Y » unifie les blocs, protège du soleil et ventile entre les bâtiments."],
+    im: [["b_apres", "Après"], ["b_avant", "Avant"], ["b_elev", "Élévation"], ["b_entree", "Nouvelle entrée"]] },
+  { id: "08", f: "ville", t: "Renaissance urbaine", s: "D’une décharge sauvage à un complexe de valorisation.", k: "Paysage urbain",
+    txt: ["Une <b>gestion différenciée des flux</b> et cinq types de dépotoirs faciles à vider et à traiter."],
+    im: [["r_1", "Point de collecte"], ["r_carte", "Sites et points de collecte"], ["r_a", "Déchets verts"], ["r_b", "Matériaux inertes"], ["r_e", "Résidus de fumées"]] },
+  { id: "09", f: "habitat", t: "Habitation R+1", s: "Une maison privée et ouverte à la fois.", k: "Habitat",
+    txt: ["Enduit ocre, éléments blancs, claustra perforé à l’étage et grande baie d’angle."],
+    im: [["h_int", "Le séjour"], ["h_1", "Façade principale"], ["h_2", "Façade sur rue"]] },
+  { id: "10", f: "industrie", t: "Unité céréalière Delwendé", s: "Une usine circulaire autour d’un patio.", k: "Industrie",
+    txt: ["Une volumétrie circulaire pour la marche en avant, une toiture en pans coupés qui converge vers un patio lumineux."],
+    im: [["d_2", "Entrée"], ["d_1", "Le patio central"], ["d_plan", "Plan"]] },
+  { id: "11", f: "habitat", t: "Villa Patio", s: "Une maison basse autour d’un patio, en deux variantes.", k: "Habitat",
+    txt: ["<b>Variante A</b> : la piscine au fond, les chambres autour du patio. <b>Variante B</b> : la cour et la piscine au centre, les chambres au fond devant un jardin privé."],
+    im: [["n_A_1TL", "Variante A depuis la rue"], ["n_B_1TL", "Variante B depuis la rue"], ["n_A_plan", "Plan A"], ["n_B_plan", "Plan B"], ["n_A_1BR", "Terrasse et piscine"], ["n_B_1BR", "Cour et piscine"]] },
+  { id: "12", f: "habitat", t: "Maison Pierre & Cour", s: "Une maison basse en moellons, ouverte sur sa cour.", k: "Habitat",
+    txt: ["Une maison de plain-pied en fond de parcelle, qui libère une <b>grande cour</b> plantée. Moellons de pierre, persiennes en bois et toitures décalées qui laissent passer l’air."],
+    im: [["tg_1", "Au crépuscule"], ["tg_2", "Façade sur cour"], ["tg_3", "L’allée d’entrée"], ["tg_4", "Vue aérienne"], ["tg_6", "Implantation"]] },
+  { id: "13", f: "equipement", t: "Chapelle de Lumière", s: "Un volume simple de brique, une lumière douce.", k: "Équipement cultuel",
+    txt: ["Une nef sous <b>charpente métallique légère</b> à bandes translucides, des murs en brique et de larges baies qui éclairent et ventilent l’assemblée."],
+    im: [["chn_choeur", "Le chœur et la chorale"], ["chn_ext", "Façade et entrée"], ["chn_culte", "L’assemblée"]] },
+  { id: "14", f: "equipement", t: "Plateau de Glisse", s: "Un espace de glisse ouvert sur la ville, de jour comme de nuit.", k: "Équipement sportif",
+    txt: ["Un plateau en béton lissé, une clôture grillagée, deux abris pour les spectateurs et des mâts d’éclairage pour pratiquer en soirée."],
+    im: [["skn_aerien", "Au coucher du soleil"], ["skn_nuit", "La nuit, sous les projecteurs"], ["skn_cones", "Atelier de slalom"], ["skn_jour", "Sur la piste"]] },
+  { id: "15", f: "habitat", t: "Triptyque", s: "Trois maisons R+1 en bande sur un même terrain.", k: "Habitat",
+    txt: ["Trois parcelles égales, un même plan : garage, cuisine, chambre et un <b>séjour en double hauteur</b> sous un bureau en mezzanine."],
+    im: [["km_rue", "La rue"], ["km_sejour", "Séjour en double hauteur"], ["km_bureau", "Bureau en mezzanine"], ["km_tv", "Coin télévision"], ["km_cuisine", "Cuisine"]] },
+];
+const $ = (s) => document.querySelector(s), $$ = (s) => document.querySelectorAll(s);
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ---------- pages (navigation par #) ----------
+const VUES = ["accueil", "services", "realisations", "assistance", "demande"];
+function montrer(v) {
+  $$(".vue").forEach((el) => (el.hidden = el.dataset.vue !== v));
+  $$("nav.menu a").forEach((a) => { if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  $("#menu").classList.remove("ouvert"); $("#burger").setAttribute("aria-expanded", "false");
+  window.scrollTo(0, 0);
+}
+function route() {
+  const h = location.hash.slice(1);
+  if (h.startsWith("projet-")) return ouvrir(h.slice(7));
+  fermer();
+  montrer(VUES.includes(h) ? h : "accueil");
+}
+addEventListener("hashchange", route);
+$("#burger").addEventListener("click", () => { const o = $("#menu").classList.toggle("ouvert"); $("#burger").setAttribute("aria-expanded", String(o)); });
+
+// ---------- accueil ----------
+const SV = ["Plans cotés", "DAO", "Modélisation 3D", "Rendus photoréalistes", "Animations", "Renfort d’équipe", "Visites de chantier", "Comptes rendus"];
+$("#piste").innerHTML = [...SV, ...SV].map((s) => `<span>${s}</span>`).join("");
+const cmp = $("#compare"), cmpR = $("#compare-r");
+cmpR.addEventListener("input", () => cmp.style.setProperty("--p", cmpR.value + "%"));
+
+// ---------- réalisations ----------
+const carte = (p, grand) => `<a class="carte${grand ? " grand" : ""}" href="#projet-${p.id}" data-f="${p.f}"><img src="img/${p.im[0][0]}.jpg" alt="${p.t}" loading="lazy"><span class="voir">Voir le projet</span><div class="info"><span class="num">${p.id} · ${p.k}</span><h3>${p.t}</h3><p>${p.s}</p></div></a>`;
+$("#grille").innerHTML = P.map((p) => carte(p, p.g)).join("");
+$("#grille-accueil").innerHTML = [P[0], P[13], P[11]].map((p, i) => carte(p, i === 0)).join("");
+$$(".filtres button").forEach((b) => b.addEventListener("click", () => {
+  $$(".filtres button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  $$("#grille .carte").forEach((c) => c.classList.toggle("cache", b.dataset.f !== "tous" && c.dataset.f !== b.dataset.f));
+}));
+
+// ---------- fiche projet ----------
+const fiche = $("#fiche"); let proj = null, img = 0;
+function rendreVue() {
+  const [n, cap] = proj.im[img];
+  fiche.querySelector(".viewer").innerHTML = `<img src="img/${n}.jpg" alt="${cap}"><div class="leg">${img + 1} / ${proj.im.length} · ${cap}</div>${proj.im.length > 1 ? `<button class="fl g" type="button" aria-label="Image précédente">‹</button><button class="fl d" type="button" aria-label="Image suivante">›</button>` : ""}`;
+  fiche.querySelectorAll(".vignettes button").forEach((b, k) => b.classList.toggle("on", k === img));
+  fiche.querySelector(".fl.g")?.addEventListener("click", () => { img = (img - 1 + proj.im.length) % proj.im.length; rendreVue(); });
+  fiche.querySelector(".fl.d")?.addEventListener("click", () => { img = (img + 1) % proj.im.length; rendreVue(); });
+}
+function ouvrir(id) {
+  const i = P.findIndex((p) => p.id === id); if (i < 0) return fermer();
+  proj = P[i]; img = 0;
+  const prev = P[(i + P.length - 1) % P.length], next = P[(i + 1) % P.length];
+  const cart = [["Type", proj.k], proj.lieu && ["Lieu", proj.lieu]].filter(Boolean);
+  fiche.innerHTML = `<div class="barre"><div class="wrap"><a href="#realisations">← Toutes les réalisations</a><div class="np"><a href="#projet-${prev.id}">Précédent</a><a href="#projet-${next.id}">Suivant</a></div></div></div>
+    <div class="viewer"></div>
+    <div class="wrap"><div class="vignettes">${proj.im.map(([n, c]) => `<button type="button" aria-label="${c}"><img src="img/${n}.jpg" alt="" loading="lazy"></button>`).join("")}</div>
+      <div class="entete"><div class="gros">${proj.id}</div><div><h2 id="f-titre">${proj.t}</h2><p class="sous">${proj.s}</p></div></div>
+      <div class="corps"><div>${proj.txt.map((t) => `<p>${t}</p>`).join("")}</div><div class="cart">${cart.map(([a, b]) => `<div><span class="cote">${a}</span><br><span>${b}</span></div>`).join("")}<a class="btn" href="#demande">Un projet similaire ? Devis →</a></div></div></div>`;
+  fiche.querySelectorAll(".vignettes button").forEach((b, k) => b.addEventListener("click", () => { img = k; rendreVue(); }));
+  rendreVue();
+  fiche.hidden = false; fiche.scrollTop = 0; document.body.style.overflow = "hidden";
+  fiche.querySelector(".barre a").focus({ preventScroll: true });
+}
+function fermer() { if (!fiche.hidden) { fiche.hidden = true; document.body.style.overflow = ""; } }
+addEventListener("keydown", (e) => {
+  if (fiche.hidden || !proj) return;
+  if (e.key === "Escape") location.hash = "realisations";
+  if (e.key === "ArrowRight") { img = (img + 1) % proj.im.length; rendreVue(); }
+  if (e.key === "ArrowLeft") { img = (img - 1 + proj.im.length) % proj.im.length; rendreVue(); }
+});
+
+// ---------- demandes : onglets, résumé, envoi ----------
+document.querySelectorAll("[data-devis]").forEach((a) => a.addEventListener("click", () => setTimeout(() => {
+  onglet("devis"); document.querySelectorAll("#d-prest input").forEach((i) => { if (i.value === a.dataset.devis) i.checked = true; });
+}, 0)));
+function onglet(q) {
+  const devis = q === "devis";
+  $("#tab-devis").setAttribute("aria-selected", String(devis)); $("#tab-assist").setAttribute("aria-selected", String(!devis));
+  $("#form-devis").hidden = !devis; $("#form-assist").hidden = devis;
+}
+$("#tab-devis").addEventListener("click", () => onglet("devis"));
+$("#tab-assist").addEventListener("click", () => onglet("assist"));
+// les boutons « Choisir » des formules préremplissent l’assistance
+$$("[data-pre]").forEach((a) => a.addEventListener("click", () => {
+  setTimeout(() => { onglet("assist"); const r = document.querySelector(`#a-form input[data-k="${a.dataset.pre}"]`); if (r) { r.checked = true; majAssist(); } }, 0);
+}));
+function majAssist() {
+  const k = document.querySelector("#a-form input:checked")?.dataset.k;
+  $("#a-duree-c").hidden = k !== "cdd"; $("#a-vis-c").hidden = k !== "chantier";
+}
+$$("#a-form input").forEach((r) => r.addEventListener("change", majAssist));
+const val = (id) => document.getElementById(id).value.trim();
+const coches = (sel) => [...document.querySelectorAll(sel + " input:checked")].map((i) => i.value);
+const ligne = (k, v) => (v ? `${k} : ${v}\n` : "");
+let sujet = "", corps = "";
+function afficher(titre, s, c) {
+  sujet = s; corps = c;
+  $("#r-titre").textContent = titre; $("#r-texte").textContent = c;
+  $("#r-gmail").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(EMAIL) + "&su=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(c);
+  $("#r-wa").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(s + "\n\n" + c);
+  $("#r-mail").href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(c);
+  $("#r-envoi").hidden = false; envoye = false; $("#r-direct").disabled = false; $("#r-direct").textContent = "Envoyer ma demande"; $("#r-etat").textContent = "";
+  if (innerWidth < 1000) document.querySelector(".resume").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("#form-devis").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!val("d-nom") || !val("d-tel")) { $("#d-err").textContent = "Indiquez votre nom ou entreprise et un numéro pour être recontacté."; return; }
+  $("#d-err").textContent = "";
+  const prest = coches("#d-prest");
+  const c = "Bonjour Le Freelancer,\n\nJe souhaite recevoir un devis.\n\n" +
+    ligne("Prestations", prest.join(", ") || "à définir ensemble") + ligne("Type de projet", val("d-type")) +
+    ligne("Surface", val("d-surf") ? val("d-surf") + " m²" : "") + ligne("Lieu", val("d-lieu")) + ligne("Délai", val("d-delai")) +
+    ligne("Documents disponibles", val("d-docs")) + (val("d-msg") ? "\nBesoin : " + val("d-msg") + "\n" : "") +
+    "\n— Contact —\n" + ligne("Nom / entreprise", val("d-nom")) + ligne("Téléphone", val("d-tel")) + ligne("E-mail", val("d-mail")) +
+    "\nMerci de me recontacter.";
+  afficher("Demande de devis · " + val("d-type"), "Demande de devis – " + val("d-type") + " – " + val("d-nom"), c);
+});
+$("#form-assist").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!val("a-ent") || !val("a-tel")) { $("#a-err").textContent = "Indiquez le nom de l’entreprise et un numéro pour être recontacté."; return; }
+  $("#a-err").textContent = "";
+  const f = document.querySelector("#a-form input:checked"), mode = document.querySelector('input[name="a-mode"]:checked').value;
+  const debut = val("a-debut") ? new Date(val("a-debut") + "T00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "";
+  const c = "Bonjour Le Freelancer,\n\nNotre entreprise souhaite une assistance technique.\n\n" +
+    ligne("Formule", f.value + (f.dataset.k === "cdd" && val("a-duree") ? " de " + val("a-duree") + " mois" : "")) + ligne("Mode", mode) +
+    (f.dataset.k === "chantier" ? ligne("Fréquence des visites", val("a-vis")) : "") +
+    ligne("Tâches", coches("#a-taches").join(", ") || "à définir ensemble") + ligne("Début souhaité", debut) + ligne("Lieu", val("a-lieu")) +
+    (val("a-msg") ? "\nPrécisions : " + val("a-msg") + "\n" : "") +
+    "\n— Contact —\n" + ligne("Entreprise", val("a-ent")) + ligne("Personne", val("a-pers")) + ligne("Téléphone", val("a-tel")) + ligne("E-mail", val("a-mail")) +
+    "\nMerci de nous recontacter.";
+  afficher("Assistance · " + f.value + " · " + mode, "Demande d’assistance – " + f.value + " – " + val("a-ent"), c);
+});
+let envoye = false;
+$("#r-direct").addEventListener("click", async (e) => {
+  const b = e.currentTarget; if (envoye) return;
+  b.disabled = true; b.textContent = "Envoi en cours…"; $("#r-etat").textContent = "";
+  try {
+    const rep = await fetch("https://formsubmit.co/ajax/" + EMAIL, {
+      method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ _subject: sujet, _template: "box", _captcha: "false", Demande: corps }),
+    });
+    const j = await rep.json().catch(() => ({}));
+    if (!rep.ok || j.success === "false" || j.success === false) throw new Error(j.message || "refus");
+    envoye = true; b.textContent = "Demande envoyée ✓";
+    $("#r-etat").textContent = "Merci ! Votre demande a bien été envoyée. Nous vous recontactons rapidement.";
+  } catch (err) {
+    b.disabled = false; b.textContent = "Envoyer ma demande";
+    $("#r-etat").textContent = "L’envoi direct n’a pas abouti. Utilisez Gmail, WhatsApp ou copiez le résumé ci-dessous.";
+  }
+});
+$("#r-copier").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(sujet + "\n\n" + corps); b.textContent = "Résumé copié"; }
+  catch { const r = document.createRange(); r.selectNodeContents($("#r-texte")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Texte sélectionné"; }
+  setTimeout(() => (b.textContent = "Copier le résumé"), 2000);
+});
+$$(".copier").forEach((b) => b.addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(b.dataset.c); b.textContent = "Copié"; }
+  catch { const r = document.createRange(); r.selectNodeContents(b.parentElement.querySelector(".v")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Sélectionné"; }
+  setTimeout(() => (b.textContent = "Copier"), 1800);
+}));
+
+route();
+</script>
+
+</body>
+</html>
