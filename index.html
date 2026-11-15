@@ -340,6 +340,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
       <div class="h2o-cta">
         <a class="btn gros" href="#demande">Demander un devis <span class="fl">→</span></a>
         <a class="btn ligne gros" href="#assistance">Demander une assistance</a>
+        <a class="btn ligne gros" href="#" data-ia>Discuter avec l’assistant</a>
       </div>
       <ul class="garanties">
         <li>Devis sur mesure, sans engagement</li>
@@ -440,7 +441,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 
   <section class="final"><div class="wrap">
     <h2>Votre prochain projet commence <em>par un message.</em></h2>
-    <div class="h2o-cta"><a class="btn gros" href="#demande">Demander un devis →</a><a class="btn ligne gros" href="https://wa.me/22664183326" target="_blank" rel="noopener">Écrire sur WhatsApp</a></div>
+    <div class="h2o-cta"><a class="btn gros" href="#demande">Demander un devis →</a><a class="btn ligne gros" href="https://wa.me/22651434710" target="_blank" rel="noopener">Écrire sur WhatsApp</a></div>
   </div></section>
 </div>
 
@@ -608,8 +609,8 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
   <div class="wrap">
     <h2>Un projet ?<br><span>Parlons-en.</span></h2>
     <div class="coord">
-      <div class="l"><span><span class="k">Téléphone · WhatsApp</span><span class="v">+226 64 18 33 26</span></span><button class="copier" type="button" data-c="+226 64 18 33 26">Copier</button></div>
-      <div class="l"><span><span class="k">Téléphone</span><span class="v">+226 51 43 47 10</span></span><button class="copier" type="button" data-c="+226 51 43 47 10">Copier</button></div>
+      <div class="l"><span><span class="k">Téléphone</span><span class="v">+226 64 18 33 26</span></span><button class="copier" type="button" data-c="+226 64 18 33 26">Copier</button></div>
+      <div class="l"><span><span class="k">Téléphone · WhatsApp</span><span class="v">+226 51 43 47 10</span></span><button class="copier" type="button" data-c="+226 51 43 47 10">Copier</button></div>
       <div class="l"><span><span class="k">E-mail</span><span class="v">ephremdimitri@gmail.com</span></span><button class="copier" type="button" data-c="ephremdimitri@gmail.com">Copier</button></div>
       <div class="l"><span><span class="k">Zone d’intervention</span><span class="v">Burkina Faso et international</span></span></div>
     </div>
@@ -620,7 +621,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 <div class="fiche" id="fiche" hidden role="dialog" aria-modal="true" aria-labelledby="f-titre"></div>
 
 <script>
-const EMAIL = "ephremdimitri@gmail.com", WA = "22664183326";
+const EMAIL = "ephremdimitri@gmail.com", WA = "22651434710";
 const P = [
   { id: "01", f: "industrie", g: true, t: "UniTraCe Koudougou", s: "Unité de transformation céréalière en briques de terre.", k: "Industrie agro-alimentaire", lieu: "Koudougou",
     txt: ["Un <b>prototype semi-industriel reproductible</b> pour transformer le mil, le maïs, le sorgho et le riz, sur 3 250 m² pour 30 usagers.", "Depuis la rue, on voit de la terre et du végétal, pas un entrepôt. Une seule chaîne en marche avant évite tout croisement entre matière et personnel.", "Briques de terre comprimée, double peau en panneaux « sablier », plantes grimpantes et sheds ventilés : le confort sans climatisation."],
@@ -827,6 +828,205 @@ $$(".copier").forEach((b) => b.addEventListener("click", async () => {
 }));
 
 route();
+</script>
+
+
+<!-- ================= ASSISTANT IA ================= -->
+<style>
+.ia-bouton { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; align-items: center; gap: 10px; background: #f0a91c; color: #141413; border: 0; border-radius: 999px; padding: 12px 18px 12px 12px; font: 800 15px var(--f-texte); cursor: pointer; box-shadow: 0 14px 30px -12px rgba(0,0,0,.55); animation: ia-pulse 2.6s ease-in-out infinite; }
+.ia-bouton img { width: 34px; height: 34px; border-radius: 50%; background: #fff; object-fit: contain; padding: 2px; }
+@keyframes ia-pulse { 50% { box-shadow: 0 0 0 10px rgba(240,169,28,.18), 0 14px 30px -12px rgba(0,0,0,.55); } }
+.ia-panneau { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 61; width: min(400px, calc(100vw - 24px)); height: min(640px, calc(100vh - 36px)); background: var(--fond); color: var(--encre); border: 1px solid var(--filet); border-radius: 16px; box-shadow: 0 30px 70px -20px rgba(0,0,0,.6); display: flex; flex-direction: column; overflow: hidden; }
+.ia-panneau[hidden] { display: none; }
+.ia-tete { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #141413; color: #f5f3ee; }
+.ia-tete img { width: 36px; height: 36px; border-radius: 50%; background: #fff; object-fit: contain; padding: 2px; }
+.ia-tete b { display: block; font: 800 15px var(--f-texte); }
+.ia-tete span { font-size: 12px; color: #c9c3b8; }
+.ia-tete button { margin-left: auto; background: none; border: 0; color: #f5f3ee; font-size: 22px; cursor: pointer; padding: 4px 8px; }
+.ia-fil { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--fond-2); }
+.ia-msg { max-width: 86%; padding: 10px 13px; border-radius: 14px; font-size: 15px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ia-msg.bot { background: var(--fond); border: 1px solid var(--filet); border-bottom-left-radius: 4px; align-self: flex-start; }
+.ia-msg.moi { background: #f0a91c; color: #141413; border-bottom-right-radius: 4px; align-self: flex-end; }
+.ia-msg.ecrit { color: var(--gris); font-style: italic; }
+.ia-sugg { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px 0; background: var(--fond-2); }
+.ia-sugg button { font: 600 13px var(--f-texte); border: 1.5px solid var(--filet); background: var(--fond); color: var(--encre); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+.ia-sugg button:hover { border-color: #f0a91c; }
+.ia-saisie { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--filet); background: var(--fond); }
+.ia-saisie textarea { flex: 1; resize: none; font: 400 15px var(--f-texte); color: var(--encre); background: var(--fond-2); border: 1.5px solid var(--filet); border-radius: 10px; padding: 9px 10px; height: 44px; max-height: 110px; }
+.ia-saisie button { background: #f0a91c; color: #141413; border: 0; border-radius: 10px; font: 800 15px var(--f-texte); padding: 0 14px; cursor: pointer; }
+.ia-fin { padding: 0 10px 10px; background: var(--fond); }
+.ia-fin button { width: 100%; background: #141413; color: #f5f3ee; border: 0; border-radius: 10px; padding: 11px; font: 700 14px var(--f-texte); cursor: pointer; }
+:root[data-theme="dark"] .ia-fin button { background: #f5f3ee; color: #141413; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ia-fin button { background: #f5f3ee; color: #141413; } }
+.ia-resume { padding: 12px; background: var(--fond); border-top: 1px solid var(--filet); display: grid; gap: 8px; max-height: 60%; overflow-y: auto; }
+.ia-resume[hidden] { display: none; }
+.ia-resume pre { margin: 0; white-space: pre-wrap; font: 400 13.5px/1.5 var(--f-texte); background: var(--fond-2); padding: 10px; border-radius: 8px; }
+.ia-resume .ligne-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ia-resume a, .ia-resume button { text-align: center; text-decoration: none; border-radius: 10px; padding: 10px; font: 700 14px var(--f-texte); cursor: pointer; border: 0; }
+.ia-resume .p { background: #f0a91c; color: #141413; }
+.ia-resume .s { background: var(--fond-2); color: var(--encre); border: 1.5px solid var(--filet); }
+.ia-etat { font-size: 13px; color: var(--gris); min-height: 1em; }
+@media (max-width: 520px) { .ia-panneau { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; } .ia-bouton span { display: none; } .ia-bouton { padding: 10px; } }
+</style>
+
+<button class="ia-bouton" type="button" id="ia-ouvrir" aria-controls="ia-panneau" aria-expanded="false"><img src="img/logo_lf.webp" alt=""><span>Discuter de mon projet</span></button>
+<section class="ia-panneau" id="ia-panneau" role="dialog" aria-label="Assistant Le Freelancer" hidden>
+  <div class="ia-tete"><img src="img/logo_lf.webp" alt=""><div><b>Assistant Le Freelancer</b><span>Devis, prix indicatifs, assistance</span></div><button type="button" id="ia-fermer" aria-label="Fermer la discussion">×</button></div>
+  <div class="ia-fil" id="ia-fil" aria-live="polite"></div>
+  <div class="ia-sugg" id="ia-sugg"></div>
+  <form class="ia-saisie" id="ia-form"><label for="ia-texte" class="cote" style="position:absolute;left:-9999px">Votre message</label><textarea id="ia-texte" rows="1" placeholder="Décrivez votre projet…"></textarea><button type="submit" aria-label="Envoyer le message">➤</button></form>
+  <div class="ia-fin"><button type="button" id="ia-terminer">Terminer et envoyer ma demande</button></div>
+  <div class="ia-resume" id="ia-resume" hidden>
+    <b>Résumé de votre demande</b>
+    <pre id="ia-resume-texte"></pre>
+    <button class="p" type="button" id="ia-direct">Envoyer à Le Freelancer</button>
+    <div class="ligne-btn"><a class="s" id="ia-wa" target="_blank" rel="noopener">WhatsApp</a><a class="s" id="ia-gmail" target="_blank" rel="noopener">Gmail</a></div>
+    <div class="ligne-btn"><button class="s" type="button" id="ia-copier">Copier</button><button class="s" type="button" id="ia-reprendre">Reprendre</button></div>
+    <p class="ia-etat" id="ia-etat" aria-live="polite"></p>
+  </div>
+</section>
+
+<script>
+(() => {
+  const MAIL = "ephremdimitri@gmail.com", WHATSAPP = "22651434710";
+  // Base de connaissances et de prix de l'assistant (FCFA, indicatifs)
+  const BASE = `Tu es l'assistant commercial de LE FREELANCER, structure indépendante au Burkina Faso : partenaire technique et graphique des professionnels du BTP (entreprises, bureaux d'études, architectes, promoteurs) et des particuliers. Travail à distance et sur site, Burkina Faso et international.
+
+SERVICES
+1. Architecture et DAO : mise au propre de plans, plans architecturaux cotés, coupes, façades, plans de toiture et de masse, dossiers graphiques, plans d'exécution selon la mission.
+2. Modélisation 3D et visualisation : modélisation Archicad, rendus photoréalistes Lumion (extérieurs, intérieurs, vues aériennes), animations architecturales, planches de présentation.
+3. Assistance technique BTP : visites de chantier, photos de l'avancement, comptes rendus de visite, suivi visuel des travaux, signalement des écarts apparents avec les documents du projet. Renfort d'équipe à la semaine, au mois ou en CDD, à distance, en présentiel ou mixte.
+Le Freelancer ne propose PAS de missions réglementées de maîtrise d'œuvre, de supervision ou de signature de permis : si on le demande, dis que ce n'est pas proposé pour l'instant.
+
+BASE DE PRIX INDICATIFS (FCFA)
+Par prestation :
+- Mise au propre d'un plan : 15 000 à 25 000
+- Plan architectural coté : 25 000 à 40 000
+- Modélisation 3D simple : 50 000 à 80 000
+- Modélisation d'une villa : 70 000 à 110 000
+- Rendu Lumion extérieur : 30 000 à 45 000 par vue
+- Rendu intérieur : 25 000 à 40 000 par vue
+- Planche A1 de présentation : 25 000 à 40 000
+- Animation courte : 60 000 à 100 000
+- Visite de chantier avec rapport : 20 000 à 30 000 par visite
+- Suivi de chantier régulier (contrat mensuel) : à partir d'environ 120 000 par mois selon le nombre de visites
+Au mètre carré (bâtiments) :
+- Mise au propre DAO : 600 F/m²
+- Dessins architecturaux : 800 F/m²
+- Dossier graphique complet : 1 200 F/m²
+- Modélisation Archicad : 700 F/m²
+- Rendu Lumion : 700 F/m²
+- Modélisation + rendu : 1 200 F/m²
+- Pack complet : 2 000 F/m²
+Renfort d'équipe (1 semaine, 1 mois, CDD) : sur devis selon les tâches, le mode et la durée ; ne donne pas de chiffre, propose d'envoyer la demande.
+CONDITIONS : 50 % d'acompte au démarrage, solde avant la livraison finale. Deux séries de corrections incluses. Supplément pour les urgences et les déplacements. Fichiers sources modifiables inclus ou facturés selon le devis. Tarifs réduits possibles pour les entreprises partenaires et les commandes régulières.
+
+COMMENT TU TRAVAILLES
+- Réponds toujours en français, de façon chaleureuse, professionnelle et COURTE (3 à 5 phrases maximum). Tutoie jamais : vouvoie le client.
+- Pose une ou deux questions à la fois pour comprendre : type de projet, prestations voulues, surface en m², nombre de vues ou de plans, documents disponibles (croquis, plans papier, DWG), lieu, délai, puis nom ou entreprise et numéro de téléphone/WhatsApp.
+- Si le client demande un prix, donne TOUT DE SUITE une première fourchette indicative avec les éléments déjà connus (en annonçant tes hypothèses), puis pose tes questions pour l'affiner.
+- Quand tu as assez d'éléments, calcule une ESTIMATION avec la base ci-dessus et présente-la comme une fourchette indicative (par exemple « entre 180 000 et 240 000 FCFA »), en détaillant le calcul simplement. Précise toujours que le prix définitif est confirmé par un devis après étude des documents.
+- Tu peux négocier un peu : proposer de réduire le nombre de vues, d'étaler la livraison, un pack, ou mentionner le tarif partenaire pour des commandes régulières. Ne descends jamais sous le bas des fourchettes et ne promets jamais de gratuité ni de rabais chiffré au-delà de 10 %.
+- N'invente aucun autre service, aucun délai garanti, aucune référence client.
+- Quand le client semble prêt, invite-le à cliquer sur « Terminer et envoyer ma demande ».`;
+
+  const $i = (id) => document.getElementById(id);
+  const fil = $i("ia-fil"), panneau = $i("ia-panneau"), texte = $i("ia-texte");
+  let histo = [], occupe = false, resumeTxt = "";
+  const SUGG = ["J’ai besoin de plans pour ma maison", "Combien coûte un rendu 3D ?", "Je veux un renfort pour mon entreprise", "Suivi de chantier"];
+
+  function bulle(role, t) {
+    const d = document.createElement("div");
+    d.className = "ia-msg " + (role === "user" ? "moi" : "bot");
+    d.textContent = t; fil.appendChild(d); fil.scrollTop = fil.scrollHeight; return d;
+  }
+  function suggestions(liste) {
+    $i("ia-sugg").innerHTML = "";
+    liste.forEach((s) => { const b = document.createElement("button"); b.type = "button"; b.textContent = s; b.onclick = () => envoyer(s); $i("ia-sugg").appendChild(b); });
+  }
+  async function ia(messages, temp = 0.6, essais = 2) {
+    const corps = { model: "openai", messages, temperature: temp };
+    for (let essai = 0; essai < essais; essai++) {
+      const ctrl = new AbortController(), minuterie = setTimeout(() => ctrl.abort(), 35000);
+      try {
+        const r = await fetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corps), signal: ctrl.signal });
+        clearTimeout(minuterie);
+        if (!r.ok) throw new Error(r.status);
+        const j = await r.json(); const t = j?.choices?.[0]?.message?.content?.trim();
+        if (t) return t;
+      } catch (e) { clearTimeout(minuterie); if (essai < essais - 1) await new Promise((ok) => setTimeout(ok, 4000)); }
+    }
+    return null;
+  }
+  async function envoyer(t) {
+    t = (t || "").trim(); if (!t || occupe) return;
+    occupe = true; suggestions([]); texte.value = "";
+    bulle("user", t); histo.push({ role: "user", content: t });
+    const att = bulle("bot", "L’assistant écrit…"); att.classList.add("ecrit");
+    const rep = await ia([{ role: "system", content: BASE }, ...histo.slice(-16)]);
+    att.remove();
+    const msg = (rep && rep.replace(/\*\*/g, "").replace(/^#+\s*/gm, "")) || "Je n’arrive pas à répondre pour le moment. Vous pouvez continuer à décrire votre besoin, puis cliquer sur « Terminer et envoyer ma demande » : Le Freelancer vous recontactera rapidement.";
+    bulle("bot", msg); histo.push({ role: "assistant", content: msg });
+    occupe = false; texte.focus();
+  }
+  function demarrer() {
+    if (histo.length) return;
+    const accueil = "Bonjour et bienvenue chez Le Freelancer ! Je peux vous aider à préciser votre projet (plans, 3D, rendus, suivi de chantier ou renfort d’équipe) et vous donner une estimation indicative. Quel est votre besoin ?";
+    bulle("bot", accueil); histo.push({ role: "assistant", content: accueil }); suggestions(SUGG);
+  }
+  // fiche de secours si l'IA ne répond pas : coordonnées repérées + messages du client + dernière estimation
+  function ficheLocale() {
+    const client = histo.filter((m) => m.role === "user").map((m) => m.content);
+    const tout = client.join(" ");
+    const tel = (tout.match(/(?:\+?226[\s.-]?)?(?:\d{2}[\s.-]?){4}/g) || []).map((s) => s.trim()).filter((s) => s.replace(/\D/g, "").length >= 8);
+    const mail = tout.match(/[\w.+-]+@[\w-]+\.[\w.]+/g) || [];
+    const estim = [...histo].reverse().find((m) => m.role === "assistant" && /FCFA|F\s?CFA|\d{2}\s?000/.test(m.content));
+    return "Contact : " + (tel.length ? tel.join(", ") : "non précisé") + (mail.length ? " · " + mail.join(", ") : "") +
+      "\n\nCe que le client a écrit :\n" + client.map((t) => "- " + t).join("\n") +
+      (estim ? "\n\nDernière estimation donnée par l’assistant :\n" + estim.content : "");
+  }
+  async function terminer() {
+    if (occupe) return;
+    if (!histo.some((m) => m.role === "user")) { bulle("bot", "Décrivez-moi d’abord votre besoin en quelques mots, je préparerai ensuite le résumé."); return; }
+    occupe = true; await new Promise((ok) => setTimeout(ok, 2500));
+    const att = bulle("bot", "Je prépare le résumé de notre échange…"); att.classList.add("ecrit");
+    const conv = histo.map((m) => (m.role === "user" ? "CLIENT : " : "ASSISTANT : ") + m.content).join("\n");
+    const res = await ia([{ role: "system", content: "Tu rédiges des fiches de demande claires en français pour Le Freelancer. Pas de markdown (ni **, ni #), seulement des lignes « Libellé : valeur » et des tirets." },
+      { role: "user", content: "Résume cette discussion en fiche de demande pour Le Freelancer, avec ces rubriques si l'information existe : Client (nom/entreprise), Contact (téléphone, e-mail), Type de demande, Projet (nature, lieu, surface), Prestations souhaitées, Documents disponibles, Délai, Estimation indicative discutée, Points à préciser. Écris « non précisé » si une information manque. N'invente rien.\n\n" + conv }], 0.2, 1);
+    att.remove(); occupe = false;
+    resumeTxt = "Demande via l’assistant du site Le Freelancer\n\n" + (res ? res.replace(/\*\*|#+ /g, "") : ficheLocale());
+    $i("ia-resume-texte").textContent = resumeTxt;
+    const sujet = "Demande client – site Le Freelancer";
+    $i("ia-wa").href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(resumeTxt);
+    $i("ia-gmail").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" + MAIL + "&su=" + encodeURIComponent(sujet) + "&body=" + encodeURIComponent(resumeTxt);
+    $i("ia-etat").textContent = ""; $i("ia-direct").disabled = false; $i("ia-direct").textContent = "Envoyer à Le Freelancer";
+    $i("ia-resume").hidden = false; $i("ia-form").hidden = true; document.querySelector(".ia-fin").hidden = true; $i("ia-sugg").hidden = true;
+  }
+  $i("ia-direct").onclick = async (e) => {
+    const b = e.currentTarget; b.disabled = true; b.textContent = "Envoi…";
+    try {
+      const r = await fetch("https://formsubmit.co/ajax/" + MAIL, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ _subject: "Demande client – assistant du site", _template: "box", _captcha: "false", Demande: resumeTxt }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || j.success === "false" || j.success === false) throw 0;
+      b.textContent = "Demande envoyée ✓"; $i("ia-etat").textContent = "Merci ! Le Freelancer a bien reçu votre demande et vous recontacte rapidement.";
+    } catch { b.disabled = false; b.textContent = "Envoyer à Le Freelancer"; $i("ia-etat").textContent = "L’envoi direct n’a pas abouti : utilisez WhatsApp ou Gmail juste en dessous."; }
+  };
+  $i("ia-copier").onclick = async (e) => {
+    const b = e.currentTarget;
+    try { await navigator.clipboard.writeText(resumeTxt); b.textContent = "Copié"; } catch { const r = document.createRange(); r.selectNodeContents($i("ia-resume-texte")); getSelection().removeAllRanges(); getSelection().addRange(r); b.textContent = "Sélectionné"; }
+    setTimeout(() => (b.textContent = "Copier"), 1800);
+  };
+  $i("ia-reprendre").onclick = () => { $i("ia-resume").hidden = true; $i("ia-form").hidden = false; document.querySelector(".ia-fin").hidden = false; $i("ia-sugg").hidden = false; texte.focus(); };
+  $i("ia-terminer").onclick = terminer;
+  $i("ia-form").addEventListener("submit", (e) => { e.preventDefault(); envoyer(texte.value); });
+  texte.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); envoyer(texte.value); } });
+  const ouvrir = () => { panneau.hidden = false; $i("ia-ouvrir").hidden = true; $i("ia-ouvrir").setAttribute("aria-expanded", "true"); demarrer(); texte.focus(); };
+  $i("ia-ouvrir").onclick = ouvrir;
+  $i("ia-fermer").onclick = () => { panneau.hidden = true; $i("ia-ouvrir").hidden = false; $i("ia-ouvrir").setAttribute("aria-expanded", "false"); };
+  // tous les liens marqués data-ia ouvrent l'assistant
+  document.querySelectorAll("[data-ia]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); ouvrir(); }));
+})();
 </script>
 
 </body>
