@@ -641,7 +641,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 <script>
 const EMAIL = "ephremdimitri@gmail.com", WA = "22651434710";
 // >>> Coller ici l'adresse du script Google (https://script.google.com/macros/s/…/exec) <<<
-const GSCRIPT = "https://script.google.com/macros/s/AKfycbwPDdUNRlwSlRlTtQstcobCrFAsLm-OB8Yad29Wuoo5WQwZqoNT5y_WK__pb8j_miuD/exec";
+const GSCRIPT = "https://script.google.com/macros/s/AKfycbwXcyc0USDDmeydsGD-zk6s_3aiMhXt-WlF8z6pQx6BWUHKirhT4yIIDQDWV_uBl_DV/exec";
 window.LF_GSCRIPT = GSCRIPT;
 async function envoiGoogle(donnees) {
   if (!GSCRIPT) return false;
@@ -983,6 +983,9 @@ majHeures();
 .ia-etape .duo-b { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .ia-etape button.b { text-align: center; border-radius: 10px; padding: 11px; font: 700 14px var(--f-texte); cursor: pointer; border: 0; }
 .ia-etape .p { background: #f0a91c; color: #141413; }
+.ia-etape a.b { display: block; text-decoration: none; text-align: center; border-radius: 10px; padding: 11px; font: 700 14px var(--f-texte); }
+.ia-etape a.b[hidden] { display: none; }
+.ia-etape .wa { background: #25d366; color: #fff; }
 .ia-etape .s { background: var(--fond-2); color: var(--encre); border: 1.5px solid var(--filet); }
 .ia-etat { font-size: 13px; color: var(--gris); min-height: 1em; margin: 0; }
 .ia-etat.ok { color: #2a8f4a; font-weight: 600; }
@@ -1013,6 +1016,7 @@ majHeures();
     <div id="ia-pf"></div>
     <button class="b p" type="button" id="ia-direct">Envoyer ma demande à Le Freelancer</button>
     <button class="b s" type="button" id="ia-pdf">Télécharger ma proforma (PDF)</button>
+    <a class="b wa" id="ia-wa" target="_blank" rel="noopener" hidden>Recevoir ma proforma sur WhatsApp</a>
     <button class="b s" type="button" id="ia-reprendre">Revenir à la discussion</button>
     <p class="ia-etat" id="ia-etat" aria-live="polite"></p>
   </div>
@@ -1090,7 +1094,7 @@ DÉROULEMENT (ne brûle pas les étapes)
 4 bis. LES LIVRABLES : demande ensuite ce qu'il veut recevoir concrètement : plans de chaque niveau, coupes et façades, plan de masse, rendus 3D (nombre de vues), format des fichiers (PDF, DWG) et tirages papier éventuels. Note-les dans "projet.livrables".
 5. PROPOSITION : présente l'offre comme un geste généreux et personnalisé (« nous vous accordons notre tarif préférentiel »), uniquement pour les prestations demandées, en donnant les prix unitaires de l'offre à côté de la valeur standard (ex. « 1 300 F le m² au lieu de 1 500 »). Aucun total, aucun tableau, aucun récapitulatif : le détail chiffré figurera sur sa proforma.
 6. DISCUSSION DES PRIX : réponds aux questions, négocie selon les règles.
-7. COORDONNÉES : demande avec élégance le nom (et l'entreprise), puis le téléphone ou WhatsApp, puis l'e-mail. L'e-mail est FACULTATIF : demande-le une seule fois ; si le client n'en a pas, réponds « aucun souci, vous téléchargerez votre proforma et nous vous contacterons par téléphone ou WhatsApp » et passe à la suite sans jamais le redemander.
+7. COORDONNÉES : demande avec élégance le nom (et l'entreprise), puis le téléphone ou WhatsApp, puis l'e-mail. L'e-mail est FACULTATIF : demande-le une seule fois ; si le client n'en a pas, réponds « aucun souci, nous vous enverrons votre proforma sur WhatsApp, à votre numéro » et passe à la suite sans jamais le redemander.
 8. FIN : quand tout est réuni, invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma.
 - VISITES : uniquement le samedi. Ne demande JAMAIS « quel jour vous arrange » : propose directement « samedi matin ou samedi après-midi ? ». Si le client propose un autre jour, réponds que la semaine est complète et repropose le samedi.
 - CORRECTIONS : si le client corrige une information (nombre de chambres, lieu, nombre de visites, date de rendez-vous…), prends la correction en compte en relisant toute la discussion, confirme-la en une phrase et mets à jour tout le bloc DATA (les lignes concernées sont remplacées, jamais ajoutées en double).
@@ -1293,6 +1297,14 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     dispo = [];
     fetch(window.LF_GSCRIPT + "?action=dispo").then((r) => r.json()).then((j) => { if (j && Array.isArray(j.samedis)) dispo = j.samedis; }).catch(() => {});
   }
+  // réveil du script Google (il « s'endort » après quelques minutes sans visite) : réponses plus rapides
+  let dernierReveil = 0;
+  function reveiller() {
+    if (!window.LF_GSCRIPT || Date.now() - dernierReveil < 60000) return;
+    dernierReveil = Date.now();
+    fetch(window.LF_GSCRIPT + "?action=ping").catch(() => {});
+  }
+  setTimeout(chargerDispo, 1500);
   const cleVille = (v) => String(v || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z]/g, "").slice(0, 5);
   const jourFr = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
   function samediPropose(ville) {
@@ -1330,6 +1342,10 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     else if (!cl.email && !cl.sansMail && histo.filter((m) => m.role === "assistant" && /e-?mail/i.test(m.content)).length < 1) etape = "ÉTAPE COORDONNÉES : demande l'e-mail en précisant qu'il est facultatif (s'il n'en a pas, ce n'est pas grave).";
     else etape = "ÉTAPE FIN : remercie et invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma. Pas de récapitulatif chiffré.";
     const deja = [p.lieu && "lieu : " + p.lieu, p.terrain && "terrain : " + p.terrain, p.rdv && "visite : " + p.rdv, p.prestations && "prestations : " + p.prestations, p.livrables && "livrables : " + p.livrables, e.niveaux && e.niveaux.length && "niveaux : " + e.niveaux.map((x) => x.n + " " + x.s + " m²").join(", "), e.archi && (e.archi.demande ? "pas d'architecte : le nôtre signera" : "a déjà un architecte"), e.client.sansMail && "le client N'A PAS d'e-mail : ne le redemande jamais"].filter(Boolean).join(" ; ");
+    // remise demandée au-delà du possible : refus poliment, sans jamais l'accepter
+    const derniere = (histo.filter((m) => m.role === "user").pop() || {}).content || "";
+    const pct = (derniere.match(/(\d{2,3})\s*(%|pour ?cent|per ?cent|pourcent)/i) || [])[1];
+    if (pct && +pct > 30) etape = "Le client demande " + pct + " % de remise : c'est impossible. Refuse avec tact (sans parler de plafond ni de limite), rappelle la valeur de l'offre et accorde au mieux " + Math.min(30, (e.remise_pct || 0) + 10) + " % en échange d'un engagement (paiement rapide, commande ferme). Mets ce pourcentage, jamais " + pct + ", dans \"remise_pct\". Ne dis jamais que sa demande de " + pct + " % est acceptée.";
     return "RAPPEL INTERNE. DÉJÀ CONNU, NE LE REDEMANDE PAS : " + (deja || "rien encore") + ". " + etape + " Réponse courte (2 à 5 phrases), UNE SEULE question, jamais de liste de questions. Termine OBLIGATOIREMENT par la ligne <<<DATA {...}>>> complète.";
   }
   async function envoyer(t) {
@@ -1389,7 +1405,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     pf = { num: numero(), date: d.toLocaleDateString("fr-FR"), heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }), validite: new Date(d.getTime() + 30 * 864e5).toLocaleDateString("fr-FR"), e, c, pts };
     pf.hash = await empreinte(JSON.stringify({ n: pf.num, d: pf.date, cl: e.client, l: e.lignes, r: e.remise_pct, t: c.net }));
     const L = (k, v) => (v ? k + " : " + v + "\n" : "");
-    resumeTxt = "NOUVELLE DEMANDE CLIENT (Sira · site Le Freelancer)\nRéférence : " + pf.num + " · " + pf.date + " " + pf.heure + "\n\n— Client —\n" + L("Nom", e.client.nom) + L("Entreprise", e.client.entreprise) + L("Téléphone / WhatsApp", e.client.telephone) + L("E-mail", e.client.email) + L("Ville", e.client.ville) +
+    resumeTxt = "NOUVELLE DEMANDE CLIENT (Sira · site Le Freelancer)\nRéférence : " + pf.num + " · " + pf.date + " " + pf.heure + "\n\n— Client —\n" + L("Nom", e.client.nom) + L("Entreprise", e.client.entreprise) + L("Téléphone / WhatsApp", e.client.telephone) + L("E-mail", e.client.email || (e.client.sansMail ? "AUCUN : envoyer la proforma au client par WhatsApp au " + (e.client.telephone || "numéro ci-dessus") : "")) + L("Ville", e.client.ville) +
       "\n— Projet —\n" + L("Nature", e.projet.nature) + L("Lieu", e.projet.lieu) + L("Site / terrain", e.projet.terrain) + L("RENDEZ-VOUS VISITE DU SITE", e.projet.rdv) + L("Délai", e.projet.delai) + L("Prestations", e.projet.prestations) + L("Livrables", e.projet.livrables) + L("Niveaux", (e.niveaux || []).map((n) => n.n + " " + n.s + " m²").join(", ")) +
       (e.besoins && e.besoins.length ? "\n— Besoins exprimés —\n" + e.besoins.map((b) => "• " + b).join("\n") + "\n" : "") +
       "\n— Points clés validés par le client —\n" + pts.map((p) => "✓ " + p).join("\n") +
@@ -1403,6 +1419,9 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     $i("ia-pf").appendChild(r);
     pdfBlob = null; $i("ia-etat").textContent = ""; $i("ia-etat").className = "ia-etat";
     $i("ia-direct").disabled = false; $i("ia-direct").textContent = "Envoyer ma demande à Le Freelancer";
+    // client sans e-mail : il demande sa proforma sur WhatsApp (message déjà rédigé, à envoyer à Le Freelancer)
+    $i("ia-wa").hidden = !(e.client.sansMail || !e.client.email);
+    $i("ia-wa").href = "https://wa.me/22651434710?text=" + encodeURIComponent("Bonjour Le Freelancer, je suis " + (e.client.nom || "") + ". Merci de m'envoyer ma proforma " + pf.num + " sur WhatsApp.");
     montrerEtape("envoi"); progres();
   }
 
@@ -1576,7 +1595,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     setTimeout(inviter, 14000);
   }
   setTimeout(inviter, 2500);
-  const ouvrir = () => { invitStop = true; $i("ia-bulle").hidden = true; $i("ia-badge").hidden = true; panneau.hidden = false; $i("ia-flotte").hidden = true; $i("ia-ouvrir").setAttribute("aria-expanded", "true"); demarrer(); texte.focus(); };
+  texte.addEventListener("input", reveiller);
+  const ouvrir = () => { reveiller(); chargerDispo(); invitStop = true; $i("ia-bulle").hidden = true; $i("ia-badge").hidden = true; panneau.hidden = false; $i("ia-flotte").hidden = true; $i("ia-ouvrir").setAttribute("aria-expanded", "true"); demarrer(); texte.focus(); };
   $i("ia-ouvrir").onclick = ouvrir;
   $i("ia-bulle").onclick = ouvrir;
   $i("ia-bulle-x").onclick = (e) => { e.stopPropagation(); invitStop = true; $i("ia-bulle").hidden = true; };
