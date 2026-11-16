@@ -1090,7 +1090,7 @@ DÉROULEMENT (ne brûle pas les étapes)
 4 bis. LES LIVRABLES : demande ensuite ce qu'il veut recevoir concrètement : plans de chaque niveau, coupes et façades, plan de masse, rendus 3D (nombre de vues), format des fichiers (PDF, DWG) et tirages papier éventuels. Note-les dans "projet.livrables".
 5. PROPOSITION : présente l'offre comme un geste généreux et personnalisé (« nous vous accordons notre tarif préférentiel »), uniquement pour les prestations demandées, en donnant les prix unitaires de l'offre à côté de la valeur standard (ex. « 1 300 F le m² au lieu de 1 500 »). Aucun total, aucun tableau, aucun récapitulatif : le détail chiffré figurera sur sa proforma.
 6. DISCUSSION DES PRIX : réponds aux questions, négocie selon les règles.
-7. COORDONNÉES : demande avec élégance le nom (et l'entreprise), puis le téléphone ou WhatsApp, puis l'e-mail.
+7. COORDONNÉES : demande avec élégance le nom (et l'entreprise), puis le téléphone ou WhatsApp, puis l'e-mail. L'e-mail est FACULTATIF : demande-le une seule fois ; si le client n'en a pas, réponds « aucun souci, vous téléchargerez votre proforma et nous vous contacterons par téléphone ou WhatsApp » et passe à la suite sans jamais le redemander.
 8. FIN : quand tout est réuni, invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma.
 - VISITES : uniquement le samedi. Ne demande JAMAIS « quel jour vous arrange » : propose directement « samedi matin ou samedi après-midi ? ». Si le client propose un autre jour, réponds que la semaine est complète et repropose le samedi.
 - CORRECTIONS : si le client corrige une information (nombre de chambres, lieu, nombre de visites, date de rendez-vous…), prends la correction en compte en relisant toute la discussion, confirme-la en une phrase et mets à jour tout le bloc DATA (les lignes concernées sont remplacées, jamais ajoutées en double).
@@ -1162,7 +1162,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     }
     const LV = [[/plans? de chaque niveau|plans? des niveaux/i, "plans de chaque niveau"], [/coupe/i, "coupes"], [/fa[çc]ade/i, "façades"], [/plan de masse/i, "plan de masse"], [/\bpdf\b/i, "fichiers PDF"], [/\bdwg\b|autocad/i, "fichiers DWG"], [/tirage|imprim|papier/i, "tirages papier"], [/(\d+)\s*vues?/i, "vues 3D"], [/\bformat\s*A[0-4]\b|\bA[0-4]\b/, "format"], [/(\d+)\s*(?:rendus?|images?|vues?)?\s*3d\b/i, "rendus 3D"]];
     const livrables = LV.filter(([r]) => r.test(tout)).map(([r, n]) => { const m = tout.match(r); if (n === "format") return "plans au format " + m[0].replace(/format\s*/i, "").toUpperCase(); if (n === "rendus 3D" && m && m[1]) return m[1] + " rendus 3D"; return /tirage|vues/.test(n) && m && /\d/.test(m[0]) ? m[0] : n; }).join(", ");
-    return { telephone: tel, email: mail, nom: nomFinal, prest, archi, rdv: rdvFinal, niveaux, livrables };
+    const sansMail = !mail && /(pas|aucun|sans|n['’]?ai pas)\s*(d['’]?|de |un |une )?\s*(adresse\s*)?(e-?\s?mail|mail|courriel)/i.test(tout);
+    return { telephone: tel, email: mail, sansMail, nom: nomFinal, prest, archi, rdv: rdvFinal, niveaux, livrables };
   }
   function fusion(d) {
     const e = etat || { points: [], client: {}, projet: {}, lignes: [], remise_pct: 0 };
@@ -1188,6 +1189,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     if (!r.prest) { e.base = []; e.offre = false; }
     if (r.archi !== null) e.archi = { demande: r.archi, taux: 10 }; // les mots du client priment
     if (!e.projet.lieu && e.client.ville) e.projet.lieu = e.client.ville;
+    if (r.sansMail) { e.client.sansMail = true; if (!/@/.test(e.client.email || "")) e.client.email = ""; }
     if (r.livrables && !e.projet.livrables) e.projet.livrables = r.livrables;
     if (r.niveaux.length && !(e.niveaux && e.niveaux.length)) e.niveaux = r.niveaux;
     if (r.rdv && !e.projet.rdvDate) {
@@ -1325,9 +1327,9 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     else if (!off) etape = "ÉTAPE PROPOSITION : présente MAINTENANT l'offre généreuse pour les prestations demandées, avec les prix unitaires de l'offre et la valeur standard, sans aucun total ; remplis \"niveaux\", \"lignes\" (autres prestations), \"suivi\" ou \"architecte\" si besoin, et mets \"offre_presentee\": true. Le récapitulatif viendra à la fin.";
     else if (!cl.nom) etape = "ÉTAPE PRIX ET COORDONNÉES : réponds au client sans réécrire de montant (négocie selon les règles), puis demande son nom.";
     else if (!cl.telephone) etape = "ÉTAPE COORDONNÉES : demande le téléphone ou WhatsApp.";
-    else if (!cl.email) etape = "ÉTAPE COORDONNÉES : demande l'e-mail (facultatif).";
+    else if (!cl.email && !cl.sansMail && histo.filter((m) => m.role === "assistant" && /e-?mail/i.test(m.content)).length < 1) etape = "ÉTAPE COORDONNÉES : demande l'e-mail en précisant qu'il est facultatif (s'il n'en a pas, ce n'est pas grave).";
     else etape = "ÉTAPE FIN : remercie et invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma. Pas de récapitulatif chiffré.";
-    const deja = [p.lieu && "lieu : " + p.lieu, p.terrain && "terrain : " + p.terrain, p.rdv && "visite : " + p.rdv, p.prestations && "prestations : " + p.prestations, p.livrables && "livrables : " + p.livrables, e.niveaux && e.niveaux.length && "niveaux : " + e.niveaux.map((x) => x.n + " " + x.s + " m²").join(", "), e.archi && (e.archi.demande ? "pas d'architecte : le nôtre signera" : "a déjà un architecte")].filter(Boolean).join(" ; ");
+    const deja = [p.lieu && "lieu : " + p.lieu, p.terrain && "terrain : " + p.terrain, p.rdv && "visite : " + p.rdv, p.prestations && "prestations : " + p.prestations, p.livrables && "livrables : " + p.livrables, e.niveaux && e.niveaux.length && "niveaux : " + e.niveaux.map((x) => x.n + " " + x.s + " m²").join(", "), e.archi && (e.archi.demande ? "pas d'architecte : le nôtre signera" : "a déjà un architecte"), e.client.sansMail && "le client N'A PAS d'e-mail : ne le redemande jamais"].filter(Boolean).join(" ; ");
     return "RAPPEL INTERNE. DÉJÀ CONNU, NE LE REDEMANDE PAS : " + (deja || "rien encore") + ". " + etape + " Réponse courte (2 à 5 phrases), UNE SEULE question, jamais de liste de questions. Termine OBLIGATOIREMENT par la ligne <<<DATA {...}>>> complète.";
   }
   async function envoyer(t) {
