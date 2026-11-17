@@ -697,6 +697,29 @@ async function envoiGoogle(donnees) {
   } catch (e) { return false; }
 }
 window.LF_envoiGoogle = envoiGoogle;
+// ---------- statistiques de visite (anonymes, dans le classeur Google du responsable) ----------
+// Pour ne pas compter vos propres visites : ouvrez une fois le site avec ?admin=1 à la fin de l'adresse (?admin=0 pour annuler).
+window.LF_admin = (() => {
+  try {
+    if (/[?&]admin=1\b/.test(location.search)) localStorage.setItem("lf_admin", "1");
+    if (/[?&]admin=0\b/.test(location.search)) localStorage.removeItem("lf_admin");
+    return localStorage.getItem("lf_admin") === "1";
+  } catch (e) { return false; }
+})();
+(() => {
+  if (!GSCRIPT || window.LF_admin || navigator.webdriver) return;
+  let v = "", nouveau = false;
+  try { v = localStorage.getItem("lf_v") || ""; if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem("lf_v", v); nouveau = true; } } catch (e) { v = "anonyme"; }
+  const app = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "téléphone" : "ordinateur";
+  let src = "direct"; try { if (document.referrer && new URL(document.referrer).hostname !== location.hostname) src = new URL(document.referrer).hostname.replace(/^www\./, ""); } catch (e) {}
+  let derniere = "";
+  const vue = () => {
+    const page = location.hash.slice(1) || "accueil"; if (page === derniere) return; derniere = page;
+    const q = new URLSearchParams({ action: "vue", page, v, a: app, src, n: nouveau ? "1" : "0" });
+    fetch(GSCRIPT + "?" + q, { mode: "no-cors" }).catch(() => {}); nouveau = false; src = "interne";
+  };
+  vue(); addEventListener("hashchange", vue);
+})();
 const P = [
   { id: "01", f: "industrie", g: true, t: "UniTraCe Koudougou", s: "Unité de transformation céréalière en briques de terre.", k: "Industrie agro-alimentaire", lieu: "Koudougou",
     txt: ["Un <b>prototype semi-industriel reproductible</b> pour transformer le mil, le maïs, le sorgho et le riz, sur 3 250 m² pour 30 usagers.", "Depuis la rue, on voit de la terre et du végétal, pas un entrepôt. Une seule chaîne en marche avant évite tout croisement entre matière et personnel.", "Briques de terre comprimée, double peau en panneaux « sablier », plantes grimpantes et sheds ventilés : le confort sans climatisation."],
@@ -1420,7 +1443,7 @@ majHeures();
   <div class="ia-fil" id="ia-fil" aria-live="polite"></div>
   <div class="ia-sugg" id="ia-sugg"></div>
   <form class="ia-saisie" id="ia-form"><label for="ia-texte" style="position:absolute;left:-9999px">Votre message</label><textarea id="ia-texte" rows="1" placeholder="Écrivez votre message…"></textarea><button type="submit" aria-label="Envoyer le message">➤</button></form>
-  <div class="ia-fin" id="ia-fin"><button type="button" id="ia-terminer">Finaliser ma commande</button></div>
+  <div class="ia-fin" id="ia-fin"><button type="button" id="ia-terminer">Finaliser ma commande</button><p style="margin:6px 0 0;font-size:11px;color:var(--gris);text-align:center">Vos échanges sont conservés par Le Freelancer pour traiter votre demande.</p></div>
 
   <div class="ia-etape" id="ia-etape-points" hidden>
     <h4>1 · Points clés de votre demande</h4>
@@ -1847,6 +1870,22 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     const msg = visible || "Je rencontre un souci de connexion. Votre message est bien noté : vous pouvez continuer, ou cliquer sur « Terminer et préparer ma demande ».";
     bulle("bot", msg); histo.push({ role: "assistant", content: msg });
     occupe = false; texte.focus();
+    journaliser();
+  }
+  // ---------- journal des discussions (classeur Google du responsable) ----------
+  const DISC_ID = "S" + new Date().toISOString().slice(0, 16).replace(/\D/g, "") + "-" + Math.random().toString(36).slice(2, 6), DISC_DEBUT = new Date().toISOString();
+  let journalT = 0;
+  function journaliser() {
+    if (!window.LF_GSCRIPT || window.LF_admin || window.__siraTest || navigator.webdriver) return;
+    clearTimeout(journalT);
+    journalT = setTimeout(() => {
+      const e = etat || { client: {}, projet: {} }, nbClient = histo.filter((m) => m.role === "user").length;
+      if (!nbClient) return;
+      const etape = pf && pf.source === "sira" ? "proforma établie" : e.client.telephone ? "coordonnées laissées" : e.offre ? "offre présentée" : e.projet.rdv ? "visite fixée" : e.projet.prestations ? "besoin exprimé" : "premiers échanges";
+      const texteDisc = histo.map((m) => (m.role === "user" ? "CLIENT : " : "SIRA : ") + m.content).join("\n\n");
+      const corps = JSON.stringify({ action: "discussion", id: DISC_ID, debut: DISC_DEBUT, nb: nbClient, nom: e.client.nom || "", tel: e.client.telephone || "", projet: [e.projet.nature, e.projet.lieu, e.projet.prestations].filter(Boolean).join(" · "), etape, texte: texteDisc });
+      fetch(window.LF_GSCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: corps, keepalive: corps.length < 60000 }).catch(() => {});
+    }, 1200);
   }
   function demarrer() {
     chargerDispo();
@@ -2126,7 +2165,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       };
       const b64 = await enB64(b);
       const e2 = pf.e;
-      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: (offre ? "Devis formulaire " : "Nouvelle demande ") + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + texteOffre + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", pdf2: offre ? offre.b64 : "", nomPdf2: offre ? offre.nom : "", waTexte: offre ? offre.wa : "", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", rdvHeure: e2.projet.rdvHeure || "", reference: pf.num });
+      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: (offre ? "Devis formulaire " : "Nouvelle demande ") + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + texteOffre + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", pdf2: offre ? offre.b64 : "", nomPdf2: offre ? offre.nom : "", waTexte: offre ? offre.wa : "", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", rdvHeure: e2.projet.rdvHeure || "", reference: pf.num, origine: pf.source, total: pf.c.net, prestations: e2.lignes.map((l) => l.d.replace(/\s*\(signature.*\)$/, "")).join(" ; ") });
+      if (pf.source === "sira") journaliser();
       if (!mailOk) mailOk = (await essai(true)) || (await essai(false));
     } catch (err) { mailOk = false; }
     const pushOk = await notifierTelephone(agenda);
