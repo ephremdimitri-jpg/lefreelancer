@@ -247,6 +247,16 @@ form.f input:focus, form.f select:focus, form.f textarea:focus { border-color: v
 .puces input:checked + span { background: var(--or); border-color: var(--or); color: var(--sur-or); }
 .puces input:focus-visible + span { outline: 2px solid var(--or); outline-offset: 2px; }
 .err { color: #c0392b; font-weight: 600; font-size: 14px; min-height: 1em; }
+.etude { margin: 40px 0 56px; padding-top: 28px; border-top: 1px solid rgba(128,128,128,.25); max-width: 900px; }
+.etude h3 { margin: 6px 0 10px; font-size: 1.5rem; }
+.etude .intro { color: var(--gris); max-width: 70ch; }
+.etude ol { list-style: none; padding: 0; margin: 22px 0; display: grid; gap: 16px; }
+.etude li { display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: start; }
+.etude li .n { font: 800 1.4rem/1 var(--f-titre, inherit); color: #d7920f; border-top: 2px solid #f0a91c; padding-top: 6px; }
+.etude li p { margin: 4px 0 0; color: var(--gris); }
+.etude .docs { font-size: .95rem; }
+.etude .phases { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.etude .phases span { font-size: .8rem; padding: 5px 10px; border-radius: 999px; border: 1px solid #f0a91c; color: #d7920f; }
 .resume { position: sticky; top: 90px; background: var(--nuit); color: #f5f3ee; padding: 24px; display: grid; gap: 14px; }
 .resume h3 { font-size: 24px; }
 .resume pre { margin: 0; white-space: pre-wrap; font: 400 14px/1.55 var(--f-texte); background: rgba(255,255,255,.06); padding: 14px; max-height: 340px; overflow: auto; }
@@ -537,12 +547,16 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
           </div>
           <div class="duo">
             <div class="champ"><label class="t" for="d-rdv">Visite du site (le samedi uniquement)</label><input id="d-rdv" type="date"><p class="note" id="d-rdv-note" style="margin:4px 0 0; color:var(--gris)">Le planning de la semaine est chargé : les visites ont lieu le samedi.</p></div>
-            <div class="champ"><label class="t" for="d-rdvh">Moment</label><select id="d-rdvh"><option>Samedi matin</option><option>Samedi après-midi</option><option>Pas de visite pour l’instant</option></select></div>
+            <div class="champ"><label class="t" for="d-rdvh">Heure de la visite</label><select id="d-rdvh"><option value="8">8 h (matin)</option><option value="10">10 h (matin)</option><option value="14">14 h (après-midi)</option><option value="16">16 h (après-midi)</option><option value="">Pas de visite pour l’instant</option></select></div>
           </div>
           <div class="duo" id="d-suivi-c" hidden>
             <div class="champ"><label class="t" for="d-vis">Suivi : nombre de visites</label><div style="display:flex; gap:8px"><input id="d-vis" type="number" min="1" inputmode="numeric" value="1" style="width:90px"><select id="d-vispar"><option value="semaine">par semaine</option><option value="mois">par mois</option></select></div></div>
             <div class="champ"><label class="t" for="d-vismois">Durée du chantier (mois)</label><input id="d-vismois" type="number" min="1" inputmode="numeric" placeholder="Ex. : 6"></div>
             <p class="note" id="d-visest" style="grid-column:1/-1; margin:0; color:var(--gris)"></p>
+          </div>
+          <div class="duo" id="d-rendus-c" hidden>
+            <div class="champ"><label class="t" for="d-rext">Rendus extérieurs (nombre de vues)</label><input id="d-rext" type="number" min="0" inputmode="numeric" value="2"></div>
+            <div class="champ"><label class="t" for="d-rint">Rendus intérieurs (nombre de vues)</label><input id="d-rint" type="number" min="0" inputmode="numeric" value="0"></div>
           </div>
           <div class="champ"><label class="t" for="d-niv">Niveaux et surfaces à aménager (m²)</label><input id="d-niv" type="text" placeholder="Ex. : RDC 120 m², R+1 100 m²"></div>
           <div class="champ"><label class="t" for="d-docs">Documents disponibles</label><select id="d-docs"><option>Croquis ou idée seulement</option><option>Plans papier à mettre au propre</option><option>Plans numériques (DWG, PDF)</option><option>Maquette 3D existante</option></select></div>
@@ -608,14 +622,17 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
         <h3 id="r-titre">Votre résumé apparaîtra ici</h3>
         <pre id="r-texte">Remplissez le formulaire puis cliquez sur « Résumer ma demande ».</pre>
         <div class="envoi" id="r-envoi" hidden>
-          <button class="btn" type="button" id="r-direct">Envoyer ma demande</button>
           <p class="ok" id="r-etat" aria-live="polite"></p>
+          <button class="btn" type="button" id="r-pdf">Télécharger ma proforma (PDF)</button>
+          <a class="btn" id="r-wapf" target="_blank" rel="noopener" style="background:#25d366;border-color:#25d366;color:#fff">Recevoir ma proforma sur WhatsApp</a>
+          <a class="btn ligne" id="r-agenda" target="_blank" rel="noopener" hidden>Ajouter la visite à mon agenda</a>
+          <button class="btn ligne" type="button" id="r-direct" hidden>Réessayer l’envoi</button>
           <span class="cote" style="color:#c9c3b8">Ou par un autre moyen</span>
           <a class="btn ligne" id="r-gmail" target="_blank" rel="noopener">Envoyer par Gmail</a>
-          <a class="btn ligne" id="r-wa" target="_blank" rel="noopener">Envoyer par WhatsApp</a>
+          <a class="btn ligne" id="r-wa" target="_blank" rel="noopener">Envoyer le résumé par WhatsApp</a>
           <a class="btn ligne" id="r-mail">Autre messagerie</a>
           <button class="btn ligne" type="button" id="r-copier">Copier le résumé</button>
-          <p class="note">« Envoyer ma demande » transmet directement votre demande à Le Freelancer. Vous pouvez aussi l’envoyer par Gmail, WhatsApp ou votre messagerie.</p>
+          <p class="note">Votre demande est transmise automatiquement à Le Freelancer. Téléchargez votre proforma ou demandez-la sur WhatsApp.</p>
         </div>
       </aside>
     </div>
@@ -698,6 +715,24 @@ const P = [
     txt: ["Trois parcelles égales, un même plan : garage, cuisine, chambre et un <b>séjour en double hauteur</b> sous un bureau en mezzanine."],
     im: [["km_rue", "La rue"], ["km_sejour", "Séjour en double hauteur"], ["km_bureau", "Bureau en mezzanine"], ["km_tv", "Coin télévision"], ["km_cuisine", "Cuisine"]] },
 ];
+// ---------- l'étude de conception menée avant chaque projet ----------
+const ETUDE = {
+  "01": [["Le programme", "Transformer le mil, le maïs, le sorgho et le riz pour 30 usagers, sur 3 250 m² : un prototype pensé dès le départ pour être reproduit ailleurs."], ["L’étude des flux", "Chaque poste (réception, pétrissage, séchage, tamisage, vente) est placé sur une chaîne en marche avant. Ce schéma a donné les trois blocs autour d’un jardin."], ["Le confort sans climatisation", "Briques de terre comprimée, double peau en panneaux « sablier », sheds orientés pour évacuer la chaleur et séchoir ombragé : les choix ont été vérifiés en coupe."], ["La mise au point", "Plan d’aménagement, coupe sur les sheds et vues de chaque poste de travail pour valider l’ergonomie avant la construction."]],
+  "02": [["Le programme", "Recevoir les collecteurs, trier et transférer les ordures ménagères dans de bonnes conditions pour les agents."], ["Les diagrammes de flux", "Les circuits des camions, des déchets et du personnel ont été dessinés avant le bâtiment, pour que rien ne se croise."], ["La structure", "Une trame modulaire et de larges toitures sans poteaux encombrants laissent manœuvrer les engins et permettent d’agrandir le centre."], ["L’air et la lumière", "Une structure ouverte assure une ventilation naturelle constante sur les quais de transfert."]],
+  "03": [["Une recherche prospective", "Imaginer un lieu de soin et de recueillement à l’horizon 2100, enraciné dans les savoir-faire traditionnels."], ["La recherche structurelle", "Le squelette autoportant a été étudié en squelette et en éclaté 3D avant d’habiller les espaces."], ["Les ambiances", "Foyer de guérison, galeries suspendues et jardin intérieur : chaque espace a été mis en scène en 3D pour en tester la lumière."]],
+  "04": [["Un programme évolutif", "Un même bâtiment devait fonctionner en logement F3 puis en bureaux : deux plans ont été dessinés sur la même structure."], ["Les variantes", "Quatre écritures ont été comparées (double pente, arche, moucharabieh, formes courbes) pour choisir la plus adaptée au climat et au budget."], ["Les matériaux", "Brique apparente, charpente métallique et arches en bois, validés en images avant le chiffrage."]],
+  "05": [["Le choix constructif", "La voûte nubienne en terre a été retenue pour son inertie : l’épaisseur des murs garde la fraîcheur."], ["La lumière", "L’éclairage zénithal a été positionné en coupe pour révéler la courbure sans surchauffer le loft."], ["Les façades", "Les arcs et les ouvertures ont été dessinés pour ventiler et protéger du soleil."]],
+  "06": [["L’organisation", "Une maison en « L » autour d’un patio, avec la piscine au cœur du projet."], ["Le zonage thermique", "Les pièces de nuit et de jour ont été réparties selon l’orientation et les heures d’usage."], ["Le plan aménagé", "Mobilier, circulations et vues sur le jardin ont été calés avant la construction."]],
+  "07": [["L’état des lieux", "Un bâtiment utilitaire existant, relevé et analysé avant toute proposition (vues « avant »)."], ["Le parti", "Une toiture ondulée sur des structures en « Y » relie les blocs, protège du soleil et fait circuler l’air entre eux."], ["La nouvelle image", "Élévations et nouvelle entrée ont été étudiées pour donner au laboratoire une architecture de référence."]],
+  "08": [["Le diagnostic", "Une décharge sauvage étudiée sur le terrain : types de déchets, accès et nuisances."], ["La cartographie", "Les sites et points de collecte ont été repérés sur plan pour organiser une gestion différenciée des flux."], ["Les équipements", "Cinq types de dépotoirs, chacun dessiné pour un déchet (verts, inertes, résidus de fumées…) et facile à vider."]],
+  "09": [["Le programme", "Une maison familiale qui protège l’intimité tout en restant ouverte sur l’extérieur."], ["Les façades", "Claustra perforé à l’étage et grande baie d’angle ont été placés selon les vues et le soleil."], ["Les matériaux", "Enduit ocre et éléments blancs, validés en 3D avec le client."]],
+  "10": [["L’étude des flux", "La marche en avant de la transformation a conduit à une volumétrie circulaire."], ["La lumière", "La toiture en pans coupés converge vers un patio central qui éclaire et ventile les ateliers."], ["Le plan", "Postes, circulations et accès ont été calés sur plan avant les images."]],
+  "11": [["Deux variantes", "Deux organisations ont été proposées au client pour la même parcelle, puis comparées sur plan et en images."], ["Variante A", "La piscine au fond, les chambres autour du patio."], ["Variante B", "La cour et la piscine au centre, les chambres au fond devant un jardin privé."]],
+  "12": [["L’implantation", "La maison a été reculée en fond de parcelle pour libérer une grande cour plantée."], ["Le climat", "Toitures décalées pour faire passer l’air, persiennes en bois pour filtrer le soleil."], ["Les matériaux", "Des moellons de pierre, étudiés en vues de jour et au crépuscule."]],
+  "13": [["La lumière", "Des bandes translucides dans la charpente métallique légère apportent une lumière douce sur l’assemblée."], ["La ventilation", "De larges baies dans les murs de brique éclairent et ventilent la nef."], ["L’usage", "Chœur, chorale et assemblée ont été mis en place en 3D pour vérifier les vues."]],
+  "14": [["L’usage", "Un espace de glisse ouvert sur la ville, utilisable de jour comme de nuit."], ["Les équipements", "Plateau en béton lissé, clôture grillagée, deux abris pour les spectateurs et mâts d’éclairage."], ["Les scénarios", "Ateliers de slalom, pratique libre et soirées ont été simulés en images."]],
+  "15": [["Le découpage", "Trois parcelles égales et un même plan répété : une étude pensée pour construire vite et à coût maîtrisé."], ["L’espace intérieur", "Un séjour en double hauteur sous un bureau en mezzanine, étudié en coupe et en 3D."], ["Les pièces", "Garage, cuisine, chambre et coin télévision aménagés avant le chantier."]],
+};
 const $ = (s) => document.querySelector(s), $$ = (s) => document.querySelectorAll(s);
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
@@ -742,6 +777,15 @@ function rendreVue() {
   fiche.querySelector(".fl.g")?.addEventListener("click", () => { img = (img - 1 + proj.im.length) % proj.im.length; rendreVue(); });
   fiche.querySelector(".fl.d")?.addEventListener("click", () => { img = (img + 1) % proj.im.length; rendreVue(); });
 }
+function etudeHTML(p) {
+  const etapes = ETUDE[p.id] || [];
+  const docs = p.im.map(([, c]) => c).filter((c) => /plan|coupe|fa[çc]ade|[ée]l[ée]vation|diagramme|[ée]clat|squelette|implantation|carte|variante|avant/i.test(c));
+  return `<section class="etude"><span class="cote">L’étude de conception</span><h3>Ce qui se passe avant la construction</h3>
+    <p class="intro">Ce projet est d’abord une <b>étude</b> : analyse du site et du programme, esquisses, variantes, puis plans, coupes et images 3D. Tout est vérifié et validé avec le client avant que le chantier ne commence.</p>
+    <ol>${etapes.map(([t, d], k) => `<li><span class="n">${String(k + 1).padStart(2, "0")}</span><div><b>${t}</b><p>${d}</p></div></li>`).join("")}</ol>
+    ${docs.length ? `<p class="docs"><span class="cote">Pièces produites pendant l’étude</span><br>${docs.join(" · ")} · vues 3D</p>` : ""}
+    <p class="phases"><span>Analyse du site</span><span>Esquisse</span><span>Avant-projet</span><span>Plans, coupes, 3D</span><span>Dossier pour le chantier</span></p></section>`;
+}
 function ouvrir(id) {
   const i = P.findIndex((p) => p.id === id); if (i < 0) return fermer();
   proj = P[i]; img = 0;
@@ -751,7 +795,8 @@ function ouvrir(id) {
     <div class="viewer"></div>
     <div class="wrap"><div class="vignettes">${proj.im.map(([n, c]) => `<button type="button" aria-label="${c}"><img src="${n}.jpg" alt="" loading="lazy"></button>`).join("")}</div>
       <div class="entete"><div class="gros">${proj.id}</div><div><h2 id="f-titre">${proj.t}</h2><p class="sous">${proj.s}</p></div></div>
-      <div class="corps"><div>${proj.txt.map((t) => `<p>${t}</p>`).join("")}</div><div class="cart">${cart.map(([a, b]) => `<div><span class="cote">${a}</span><br><span>${b}</span></div>`).join("")}<a class="btn" href="#demande">Un projet similaire ? Devis →</a></div></div></div>`;
+      <div class="corps"><div>${proj.txt.map((t) => `<p>${t}</p>`).join("")}</div><div class="cart">${cart.map(([a, b]) => `<div><span class="cote">${a}</span><br><span>${b}</span></div>`).join("")}<a class="btn" href="#demande">Un projet similaire ? Devis →</a></div></div>
+      ${etudeHTML(proj)}</div>`;
   fiche.querySelectorAll(".vignettes button").forEach((b, k) => b.addEventListener("click", () => { img = k; rendreVue(); }));
   rendreVue();
   fiche.hidden = false; fiche.scrollTop = 0; document.body.style.overflow = "hidden";
@@ -798,20 +843,84 @@ function afficher(titre, s, c) {
   $("#r-envoi").hidden = false; envoye = false; $("#r-direct").disabled = false; $("#r-direct").textContent = "Envoyer ma demande"; $("#r-etat").textContent = "";
   if (innerWidth < 1000) document.querySelector(".resume").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+// ---------- proforma du formulaire : mêmes prix et mêmes règles que Sira ----------
+const fmtF = (n) => Math.round(n).toLocaleString("fr-FR").replace(/[  ]/g, " ") + " FCFA";
+let pfForm = null;
+function etatDevis() {
+  const P = window.LF_proforma, prest = coches("#d-prest"), type = val("d-type");
+  const grand = /immeuble|équipement|industriel/i.test(type);
+  const e = { points: [], client: { nom: val("d-nom"), telephone: val("d-tel"), email: val("d-mail"), ville: val("d-lieu") }, projet: { nature: type, lieu: val("d-lieu"), terrain: val("d-terrain") + (val("d-surf") ? ", parcelle de " + val("d-surf") + " m²" : ""), delai: val("d-delai"), prestations: prest.join(", ").toLowerCase() }, base: [], remise_pct: 0, besoins: [] };
+  if (!e.client.email) e.client.sansMail = true;
+  const conception = prest.some((p) => /plans|dossier|permis/i.test(p));
+  if (conception) e.niveaux = P.lireNiveaux(val("d-niv"));
+  if (prest.includes("Dossier de permis de construire")) e.base.push({ d: "Pièces complémentaires du permis", q: 1, u: "u", pu: 52000, ps: 78000 });
+  if (/partenaire/i.test(val("d-archi"))) e.archi = { demande: true, taux: 10 };
+  if (prest.includes("Modélisation 3D") && !grand) e.base.push({ d: "Modélisation 3D simple", q: 1, u: "u", pu: 65000, ps: 104000 });
+  if (prest.includes("Rendus photoréalistes")) {
+    const ext = Math.max(0, Math.round(+val("d-rext") || 0)), int = Math.max(0, Math.round(+val("d-rint") || 0));
+    if (ext) e.base.push({ d: "Rendu extérieur", q: ext, u: "u", pu: 7500, ps: 9000 });
+    if (int) e.base.push({ d: "Rendu intérieur", q: int, u: "u", pu: 7500, ps: 9000 });
+  }
+  if (prest.includes("Animation / film") && !grand) e.base.push({ d: "Animation courte", q: 1, u: "u", pu: 78000, ps: 130000 });
+  if (prest.includes("Suivi de chantier")) e.suivi = { v: Math.max(1, Math.round(+val("d-vis") || 1)), par: val("d-vispar"), mois: Math.max(0, Math.round(+val("d-vismois") || 0)) };
+  // visite du site : samedi uniquement, 4 créneaux (8 h, 10 h, 14 h, 16 h), même ville le même samedi
+  if (val("d-rdvh")) {
+    const c = P.creneauFormulaire(val("d-lieu"), val("d-rdv"), val("d-rdvh"));
+    if (c && c.date) { e.projet.rdvDate = c.date; e.projet.rdvHeure = +c.heure; e.projet.rdv = P.jourFr(c.date) + " à " + c.heure + " h"; e.creneauDecale = c.decale; }
+  } else e.projet.rdv = "pas de visite pour l’instant";
+  e.projet.livrables = [conception && "plans de chaque niveau, coupes et façades", prest.includes("Rendus photoréalistes") && "rendus 3D", "fichiers PDF"].filter(Boolean).join(", ");
+  e.besoins = [val("d-docs") && "Documents disponibles : " + val("d-docs"), val("d-msg"), grand && (prest.includes("Modélisation 3D") || prest.includes("Animation / film")) && "Modélisation 3D / animation d’un grand projet : chiffrage sur devis après étude"].filter(Boolean);
+  return e;
+}
+function etatAssist() {
+  const f = document.querySelector("#a-form input:checked"), k = f.dataset.k, mode = document.querySelector('input[name="a-mode"]:checked').value;
+  const e = { points: [], client: { nom: val("a-ent") + (val("a-pers") ? " (" + val("a-pers") + ")" : ""), entreprise: val("a-ent"), telephone: val("a-tel"), email: val("a-mail"), ville: val("a-lieu") }, projet: { nature: "Assistance : " + f.value + " (" + mode.toLowerCase() + ")", lieu: val("a-lieu"), prestations: coches("#a-taches").join(", ").toLowerCase() || "renfort d'équipe", delai: val("a-debut") ? "début le " + new Date(val("a-debut") + "T00:00").toLocaleDateString("fr-FR") : "" }, base: [], remise_pct: 0, besoins: [] };
+  if (!e.client.email) e.client.sansMail = true;
+  if (k === "chantier") e.suivi = { v: Math.max(1, Math.round(+val("a-vis") || 1)), par: val("a-vispar"), mois: Math.max(0, Math.round(+val("a-vismois") || 0)) };
+  else {
+    const h = Math.max(1, Math.round(+val("a-heures") || 1)), sem = k === "semaine" ? 1 : k === "mois" ? 4 : Math.max(1, Math.round(+val("a-duree") || 1)) * 4;
+    const hp = /pr[ée]sentiel/i.test(mode) ? h : /mixte/i.test(mode) ? Math.round(h / 2) : 0;
+    e.renfort = { h, hp, sem };
+  }
+  e.besoins = [val("a-msg"), coches("#a-taches").length && "Tâches : " + coches("#a-taches").join(", ")].filter(Boolean);
+  return e;
+}
+async function proformaFormulaire(e, titre, pts) {
+  const P = window.LF_proforma;
+  if (!P) { $("#r-etat").textContent = "Le module de proforma se charge, réessayez dans un instant."; return; }
+  pfForm = await P.creer(e, pts);
+  const c = pfForm.c;
+  const lignes = e.lignes.map((l) => "• " + l.d + " : " + l.q + (l.u === "m²" || l.u === "h" ? " " + l.u : "") + " × " + fmtF(l.pu) + " = " + fmtF(l.q * l.pu)).join("\n");
+  const texte = "Proforma " + pfForm.num + "\n\n" + (lignes || "Prestations sur devis : Le Freelancer vous recontacte.") +
+    (e.lignes.length ? "\n\n" + (c.eco > 0 ? "Valeur standard : " + fmtF(c.standard) + "\nVotre économie : " + fmtF(c.eco) + "\n" : "") + "TOTAL : " + fmtF(c.net) + "\nAcompte (50 %) : " + fmtF(c.acompte) : "") +
+    (e.projet.rdvDate ? "\n\nVisite du site : " + e.projet.rdv + (e.creneauDecale ? "\n(Notre équipe est très occupée en semaine et le créneau demandé était déjà pris : nous vous avons réservé le prochain créneau libre du samedi.)" : "") : "") +
+    "\n\n— Vos coordonnées —\n" + e.client.nom + "\n" + e.client.telephone + (e.client.email ? "\n" + e.client.email : "");
+  afficher(titre, "Demande " + pfForm.num + " – " + e.client.nom, texte);
+  $("#r-wapf").href = P.lienWA();
+  const lv = P.lienVisite(); $("#r-agenda").hidden = !lv; if (lv) $("#r-agenda").href = lv;
+  // la demande part tout de suite : e-mail avec PDF + visite dans l'agenda de Le Freelancer
+  $("#r-etat").textContent = "Envoi de votre demande à Le Freelancer…"; $("#r-direct").hidden = true;
+  const ok = await P.transmettre();
+  $("#r-etat").textContent = ok ? "Merci ! Votre demande " + pfForm.num + " est transmise à Le Freelancer. Téléchargez votre proforma ou recevez-la sur WhatsApp." : "L’envoi automatique n’a pas abouti : cliquez sur « Réessayer l’envoi » ou utilisez WhatsApp.";
+  $("#r-direct").hidden = ok; envoye = ok;
+}
 $("#form-devis").addEventListener("submit", (e) => {
   e.preventDefault();
   if (!val("d-nom") || !val("d-tel")) { $("#d-err").textContent = "Indiquez votre nom ou entreprise et un numéro pour être recontacté."; return; }
+  if (val("d-tel").replace(/\D/g, "").length < 8) { $("#d-err").textContent = "Indiquez un numéro de téléphone complet (8 chiffres au moins)."; return; }
+  if (coches("#d-prest").some((p) => /plans|dossier|permis/i.test(p)) && !window.LF_proforma?.lireNiveaux(val("d-niv")).length) { $("#d-err").textContent = "Indiquez les niveaux et la surface à aménager de chacun (ex. : RDC 120 m², R+1 100 m²) : la conception est calculée au m²."; $("#d-niv").focus(); return; }
+  if (!coches("#d-prest").length) { $("#d-err").textContent = "Cochez au moins une prestation."; return; }
   $("#d-err").textContent = "";
   const prest = coches("#d-prest");
   const c = "Bonjour Le Freelancer,\n\nJe souhaite recevoir un devis.\n\n" +
     ligne("Prestations", prest.join(", ") || "à définir ensemble") + ligne("Type de projet", val("d-type")) +
     ligne("Parcelle", val("d-surf") ? val("d-surf") + " m²" : "") + ligne("Lieu", val("d-lieu")) + ligne("Site", val("d-terrain")) + ligne("Délai", val("d-delai")) +
-    ligne("Visite du site souhaitée", val("d-rdvh") === "Pas de visite pour l’instant" ? "pas pour l’instant" : (val("d-rdv") ? new Date(val("d-rdv")).toLocaleDateString("fr-FR") + ", " : "") + val("d-rdvh")) +
+    ligne("Visite du site souhaitée", !val("d-rdvh") ? "pas pour l’instant" : "samedi " + (val("d-rdv") ? new Date(val("d-rdv") + "T12:00").toLocaleDateString("fr-FR") + " " : "") + "à " + val("d-rdvh") + " h") +
     ligne("Niveaux et surfaces", val("d-niv")) + ligne("Signature du permis", val("d-archi")) + (prest.includes("Suivi de chantier") ? ligne("Suivi de chantier", visTexte("d")) : "") +
     ligne("Documents disponibles", val("d-docs")) + (val("d-msg") ? "\nBesoin : " + val("d-msg") + "\n" : "") +
     "\n— Contact —\n" + ligne("Nom / entreprise", val("d-nom")) + ligne("Téléphone", val("d-tel")) + ligne("E-mail", val("d-mail")) +
     "\nMerci de me recontacter.";
-  afficher("Demande de devis · " + val("d-type"), "Demande de devis – " + val("d-type") + " – " + val("d-nom"), c);
+  proformaFormulaire(etatDevis(), "Votre proforma · " + val("d-type"), c.split("\n").filter((l) => / : /.test(l) && !/Nom|Téléphone|E-mail/.test(l)).slice(0, 12));
 });
 $("#form-assist").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -826,12 +935,18 @@ $("#form-assist").addEventListener("submit", (e) => {
     (val("a-msg") ? "\nPrécisions : " + val("a-msg") + "\n" : "") +
     "\n— Contact —\n" + ligne("Entreprise", val("a-ent")) + ligne("Personne", val("a-pers")) + ligne("Téléphone", val("a-tel")) + ligne("E-mail", val("a-mail")) +
     "\nMerci de nous recontacter.";
-  afficher("Assistance · " + f.value + " · " + mode, "Demande d’assistance – " + f.value + " – " + val("a-ent"), c);
+  proformaFormulaire(etatAssist(), "Votre proforma · " + f.value + " · " + mode, c.split("\n").filter((l) => / : /.test(l) && !/Entreprise|Personne|Téléphone|E-mail/.test(l)).slice(0, 12));
 });
 let envoye = false;
+$("#r-pdf").addEventListener("click", async () => { if (!window.LF_proforma || !pfForm) return; const ok = await window.LF_proforma.telecharger(); if (!ok) $("#r-etat").textContent = "La proforma n’a pas pu être générée, réessayez."; });
 $("#r-direct").addEventListener("click", async (e) => {
   const b = e.currentTarget; if (envoye) return;
   b.disabled = true; b.textContent = "Envoi en cours…"; $("#r-etat").textContent = "";
+  if (pfForm && window.LF_proforma) {
+    const ok = await window.LF_proforma.transmettre(); envoye = ok; b.disabled = false; b.hidden = ok; b.textContent = "Réessayer l’envoi";
+    $("#r-etat").textContent = ok ? "Merci ! Votre demande " + pfForm.num + " est transmise à Le Freelancer." : "L’envoi n’a pas abouti. Utilisez WhatsApp ou réessayez.";
+    return;
+  }
   try {
     const vg = (id) => (document.getElementById(id) || {}).value || "";
     if (await envoiGoogle({ sujet, texte: corps, nom: vg("d-nom") || vg("a-ent"), telephone: vg("d-tel") || vg("a-tel"), email: vg("d-mail") || vg("a-mail"), lieu: vg("d-lieu") || vg("a-lieu"), rdv: vg("d-rdvh") })) {
@@ -873,6 +988,7 @@ function visTexte(p) {
 function majVisites() {
   for (const p of ["d", "a"]) { const el = document.getElementById(p + "-visest"); if (el) el.textContent = "Estimation : " + visTexte(p); }
   const s = document.getElementById("d-suivi-c"), cb = document.querySelector('#d-prest input[value="Suivi de chantier"]'); if (s && cb) s.hidden = !cb.checked;
+  const r = document.getElementById("d-rendus-c"), cr = document.querySelector('#d-prest input[value="Rendus photoréalistes"]'); if (r && cr) r.hidden = !cr.checked;
 }
 document.addEventListener("input", (e) => { if (/^(d|a)-vis|d-prest/.test(e.target.id || "") || e.target.closest && e.target.closest("#d-prest")) majVisites(); });
 document.addEventListener("change", (e) => { if (e.target.closest && (e.target.closest("#d-prest") || /vis/.test(e.target.id || ""))) majVisites(); });
@@ -886,8 +1002,18 @@ majVisites();
   const auj = new Date(); auj.setDate(auj.getDate() + 1); d.min = iso(prochainSamedi(auj)); d.step = 7;
   d.addEventListener("change", () => {
     if (!d.value) return; const x = new Date(d.value + "T12:00:00");
-    if (x.getDay() !== 6) { const s = prochainSamedi(x); d.value = iso(s); document.getElementById("d-rdv-note").textContent = "Les visites ont lieu le samedi : nous avons choisi le samedi " + s.toLocaleDateString("fr-FR") + "."; }
+    if (x.getDay() !== 6) { const s = prochainSamedi(x); d.value = iso(s); document.getElementById("d-rdv-note").textContent = "Notre équipe est très occupée en semaine : les visites ont lieu le samedi. Nous avons choisi le samedi " + s.toLocaleDateString("fr-FR") + "."; }
   });
+  // créneau réellement libre dans l'agenda (4 visites par samedi : 8 h, 10 h, 14 h, 16 h, même ville)
+  const majCreneau = () => {
+    const P = window.LF_proforma, note = document.getElementById("d-rdv-note"), h = document.getElementById("d-rdvh").value;
+    if (!P || !h) return;
+    const c = P.creneauFormulaire(document.getElementById("d-lieu").value, d.value, h);
+    if (!c) note.textContent = "Nos samedis des prochaines semaines sont complets : nous vous rappellerons pour fixer la visite.";
+    else if (c.decale) note.textContent = "Ce créneau est déjà réservé. Prochain créneau libre : " + P.jourFr(c.date) + " à " + c.heure + " h (il sera retenu pour vous).";
+    else if (d.value) note.textContent = "Créneau libre : " + P.jourFr(c.date) + " à " + c.heure + " h.";
+  };
+  ["d-rdv", "d-rdvh", "d-lieu"].forEach((id) => document.getElementById(id).addEventListener("change", () => setTimeout(majCreneau, 0)));
 })();
 
 // ---------- renfort d'équipe : facturé à l'heure (3 250 F à distance, 3 900 F en présentiel) ----------
@@ -1089,7 +1215,7 @@ TON ET POSTURE
 
 DÉROULEMENT (ne brûle pas les étapes)
 1. LE SITE D'ABORD : informe-toi sur le terrain ou le chantier : ville et quartier, terrain acquis ou non, taille de la parcelle, accès, constructions existantes. Une question par message.
-2. RENDEZ-VOUS : propose ensuite une visite du site avec l'équipe. Les visites de site et de chantier se font UNIQUEMENT le samedi : explique avec le sourire que le planning de la semaine est chargé, propose un samedi et demande matin ou après-midi. Si le client propose un autre jour, ramène-le gentiment au samedi. Note la réponse dans "projet.rdv" (ex. « samedi 21 novembre, matin ») ou « non souhaité ».
+2. RENDEZ-VOUS : propose ensuite une visite du site avec l'équipe. Les visites de site et de chantier se font UNIQUEMENT le samedi : explique que l'équipe est entièrement prise en semaine par les chantiers et les dossiers en cours, et que le samedi est réservé aux visites. Propose directement le samedi et les heures libres que le rappel interne t'indique, et demande laquelle lui convient. Si le client propose un autre jour, explique avec courtoisie que la semaine est vraiment complète et repropose ce samedi.
 3. LE PROJET : continue la discussion sur ses besoins (pour qui, mode de vie, nombre de chambres, style, échéance ; les niveaux voulus et la surface à aménager par niveau ; pour un chantier : nombre de visites et durée). Aucun prix tant que ces étapes ne sont pas faites : si le client demande le prix trop tôt, rassure-le (« je vais vous faire une proposition très avantageuse, j'ai juste besoin de bien comprendre votre projet ») et pose ta question.
 4. CE QUE LE CLIENT VEUT : avant tout prix, demande-lui clairement quelles prestations il souhaite (plans de conception seuls, dossier de permis, rendus 3D et combien de vues, suivi de chantier…) et attends sa réponse. Note-les dans "projet.prestations".
 4 bis. LES LIVRABLES : demande ensuite ce qu'il veut recevoir concrètement : plans de chaque niveau, coupes et façades, plan de masse, rendus 3D (nombre de vues), format des fichiers (PDF, DWG) et tirages papier éventuels. Note-les dans "projet.livrables".
@@ -1097,7 +1223,7 @@ DÉROULEMENT (ne brûle pas les étapes)
 6. DISCUSSION DES PRIX : réponds aux questions, négocie selon les règles.
 7. COORDONNÉES : demande avec élégance le nom (et l'entreprise), puis le téléphone ou WhatsApp, puis l'e-mail. L'e-mail est FACULTATIF : demande-le une seule fois ; si le client n'en a pas, réponds « aucun souci, nous vous enverrons votre proforma sur WhatsApp, à votre numéro » et passe à la suite sans jamais le redemander.
 8. FIN : quand tout est réuni, invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma.
-- VISITES : uniquement le samedi. Ne demande JAMAIS « quel jour vous arrange » : propose directement « samedi matin ou samedi après-midi ? ». Si le client propose un autre jour, réponds que la semaine est complète et repropose le samedi.
+- VISITES : uniquement le samedi. Ne demande JAMAIS « quel jour vous arrange » ni « matin ou après-midi » de façon vague : propose le samedi et les heures précises libres données par le rappel interne (ex. « samedi 21 novembre à 8 h ou à 14 h »). Si le client propose un autre jour, réponds que l'équipe est entièrement occupée en semaine et repropose ce samedi.
 - CORRECTIONS : si le client corrige une information (nombre de chambres, lieu, nombre de visites, date de rendez-vous…), prends la correction en compte en relisant toute la discussion, confirme-la en une phrase et mets à jour tout le bloc DATA (les lignes concernées sont remplacées, jamais ajoutées en double).
 - Ne repose JAMAIS une question dont la réponse figure dans la discussion ou dans l'ÉTAT CONNU. Ne tourne pas en rond : chaque message fait avancer.
 - Demande la surface à aménager par niveau (en m², approximative), pas les surfaces pièce par pièce : la répartition des pièces est le travail du concepteur.
@@ -1232,6 +1358,11 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     }
     if (e.projet.rdvDate) e.projet.rdv = e.projet.rdv && /samedi/i.test(e.projet.rdv) ? e.projet.rdv : jourFr(e.projet.rdvDate);
     if (e.projet.rdv && !/samedi|non souhait|pas de visite/i.test(e.projet.rdv)) delete e.projet.rdv; // visites le samedi uniquement
+    lignesDe(e);
+    etat = e; progres(); return e;
+  }
+  // calcul des lignes de la proforma (commun à Sira et aux formulaires du site)
+  function lignesDe(e) {
     {
       // lignes = prestations de Sira + conception au m² par niveau (1 300 F/m², standard 1 500) + suivi (30 000 F la visite)
       let L = (e.base || []).slice();
@@ -1260,7 +1391,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       if (e.suivi) { const s = e.suivi, n = s.v * (s.par === "semaine" ? 4 : 1) * (s.mois || 1); L.push({ d: `Suivi de chantier : ${s.v} visite${s.v > 1 ? "s" : ""} par ${s.par}${s.mois ? " pendant " + s.mois + " mois" : " (base 1 mois)"}`, q: n, u: "visite", pu: 30000, ps: 39000, suivi: true }); }
       e.lignes = L;
     }
-    etat = e; progres(); return e;
+    return e;
   }
   function calcul(e) {
     const brut = e.lignes.reduce((s, l) => s + l.q * l.pu, 0), remise = Math.round(brut * e.remise_pct / 100), net = brut - remise;
@@ -1374,7 +1505,11 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
         const choix = [sp.matin, sp.aprem].filter((h) => h).map((h) => "à " + libHeure(h)).join(" ou ");
         const creneau = jourFr(sp.date) + " " + choix;
         if (sp.decale) etape = "ÉTAPE RENDEZ-VOUS : les visites ont lieu uniquement le samedi. Le " + jourFr(sp.premier) + " est déjà réservé (autre ville ou complet) : présente nos excuses pour notre programme chargé, rassure le client sur notre volonté de travailler sur son projet, et propose-lui une visite le " + creneau + ". Donne exactement ces heures, n'invente aucune autre date ni heure ; pas de prix.";
-        else etape = "ÉTAPE RENDEZ-VOUS : propose une visite du site le " + creneau + " (les visites ont lieu uniquement le samedi, le créneau est chargé). Donne exactement ces heures, n'invente aucune autre date ni heure ; pas de prix.";
+        else etape = "ÉTAPE RENDEZ-VOUS : explique que notre équipe est vraiment très occupée en semaine (chantiers et dossiers en cours) et que les visites se font uniquement le samedi, puis propose une visite du site le " + creneau + ", les créneaux encore libres. Donne exactement ces heures, n'invente aucune autre date ni heure ; pas de prix.";
+        // le client demande un jour de semaine : on le ramène fermement au samedi libre
+        const der = (histo.filter((m) => m.role === "user").pop() || {}).content || "";
+        if (/\b(lundi|mardi|mercredi|jeudi|vendredi|dimanche|demain|en semaine|ce soir|aujourd)/i.test(der))
+          etape = "ÉTAPE RENDEZ-VOUS : le client propose un autre jour que le samedi. Explique avec courtoisie et fermeté que toute l'équipe est entièrement occupée en semaine par les chantiers en cours, que les visites se font uniquement le samedi, et repropose le " + creneau + ". N'accepte aucun autre jour ; pas de prix.";
       }
     }
     else if (!off && n < 7 && (n < 4 || conceptionSansSurface)) etape = "ÉTAPE PROJET : parle de ses besoins comme un architecte (pour qui, chambres, style, échéance) et obtiens les niveaux voulus avec la surface à aménager de chacun en m²" + (/suivi/.test(p.prestations || "") ? " ; pour le suivi : nombre de visites par semaine ou par mois et durée" : " ; ne parle PAS de suivi ni de visites de chantier, le client ne l'a pas demandé") + " ; UNE question, pas de prix.";
@@ -1447,19 +1582,26 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join(""); }
     catch (e) { let h = 2166136261; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16).padStart(8, "0").repeat(8); }
   }
-  async function valider() {
-    const pts = [...$i("ia-points").querySelectorAll("label")].filter((l) => l.querySelector("input").checked).map((l) => l.textContent.trim());
-    const e = etat, c = calcul(e), d = new Date();
-    pf = { num: numero(), date: d.toLocaleDateString("fr-FR"), heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }), validite: new Date(d.getTime() + 30 * 864e5).toLocaleDateString("fr-FR"), e, c, pts };
+  // proforma : numéro, empreinte et résumé interne (commun à Sira et aux formulaires du site)
+  async function creerPF(e, pts, source) {
+    const c = calcul(e), d = new Date();
+    pf = { num: numero(), date: d.toLocaleDateString("fr-FR"), heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }), validite: new Date(d.getTime() + 30 * 864e5).toLocaleDateString("fr-FR"), e, c, pts, source: source || "sira" };
     pf.hash = await empreinte(JSON.stringify({ n: pf.num, d: pf.date, cl: e.client, l: e.lignes, r: e.remise_pct, t: c.net }));
+    pdfBlob = null;
     const L = (k, v) => (v ? k + " : " + v + "\n" : "");
-    resumeTxt = "NOUVELLE DEMANDE CLIENT (Sira · site Le Freelancer)\nRéférence : " + pf.num + " · " + pf.date + " " + pf.heure + "\n\n— Client —\n" + L("Nom", e.client.nom) + L("Entreprise", e.client.entreprise) + L("Téléphone / WhatsApp", e.client.telephone) + L("E-mail", e.client.email || (e.client.sansMail ? "AUCUN : envoyer la proforma au client par WhatsApp au " + (e.client.telephone || "numéro ci-dessus") : "")) + L("Ville", e.client.ville) +
+    resumeTxt = "NOUVELLE DEMANDE CLIENT (" + (pf.source === "formulaire" ? "formulaire du site" : "Sira · site Le Freelancer") + ")\nRéférence : " + pf.num + " · " + pf.date + " " + pf.heure + "\n\n— Client —\n" + L("Nom", e.client.nom) + L("Entreprise", e.client.entreprise) + L("Téléphone / WhatsApp", e.client.telephone) + L("E-mail", e.client.email || (e.client.sansMail ? "AUCUN : envoyer la proforma au client par WhatsApp au " + (e.client.telephone || "numéro ci-dessus") : "")) + L("Ville", e.client.ville) +
       "\n— Projet —\n" + L("Nature", e.projet.nature) + L("Lieu", e.projet.lieu) + L("Site / terrain", e.projet.terrain) + L("RENDEZ-VOUS VISITE DU SITE", e.projet.rdv) + L("Délai", e.projet.delai) + L("Prestations", e.projet.prestations) + L("Livrables", e.projet.livrables) + L("Niveaux", (e.niveaux || []).map((n) => n.n + " " + n.s + " m²").join(", ")) +
       (e.besoins && e.besoins.length ? "\n— Besoins exprimés —\n" + e.besoins.map((b) => "• " + b).join("\n") + "\n" : "") +
       "\n— Points clés validés par le client —\n" + pts.map((p) => "✓ " + p).join("\n") +
       (e.lignes.length ? "\n\n— Proforma —\n" + e.lignes.map((l) => `- ${l.d} : ${l.q} × ${fcfa(l.pu)} = ${fcfa(l.q * l.pu)}`).join("\n") + (e.remise_pct ? `\nRemise ${e.remise_pct} % : − ${fcfa(c.remise)}` : "") + (c.eco > 0 ? `\nValeur standard : ${fcfa(c.standard)} (économie client : ${fcfa(c.eco)})` : "") + `\nTOTAL CONCEPTION : ${fcfa(c.net)}\nAcompte 50 % : ${fcfa(c.acompte)}` : "\n\nProforma : prestations sur devis, à chiffrer.") +
       (e.partArchi ? `\n\n— Interne (non visible du client) —\nPart architecte incluse dans les prix (10 %, avant remise) : ${fcfa(e.partArchi)}` : "") +
       "\n\nEmpreinte de la proforma (SHA-256) : " + pf.hash;
+    return pf;
+  }
+  const lienWA = () => "https://wa.me/22651434710?text=" + encodeURIComponent("Bonjour Le Freelancer, je suis " + (pf.e.client.nom || "") + ". Merci de m'envoyer ma proforma " + pf.num + " sur WhatsApp.");
+  async function valider() {
+    const pts = [...$i("ia-points").querySelectorAll("label")].filter((l) => l.querySelector("input").checked).map((l) => l.textContent.trim());
+    const e = etat; await creerPF(e, pts, "sira"); const c = pf.c;
     $i("ia-pf").innerHTML = "";
     const r = document.createElement("div"); r.className = "ia-devis";
     r.innerHTML = `<b class="t">Proforma ${pf.num}</b><table><tr><td>Client</td><td class="n"></td></tr>${e.lignes.length ? `<tr class="tot"><td>Total${c.a ? " conception" : ""}</td><td class="n">${fcfa(c.net)}</td></tr>${c.eco > 0 ? `<tr><td style="color:#2a8f4a">Votre économie</td><td class="n" style="color:#2a8f4a">${fcfa(c.eco)}</td></tr>` : ""}<tr><td>Acompte 50 %</td><td class="n">${fcfa(c.acompte)}</td></tr>` : `<tr><td colspan="2">Prestations sur devis : Le Freelancer vous recontacte.</td></tr>`}${c.a ? `<tr><td>Honoraires architecte (${c.a.taux} %)</td><td class="n">${c.hon ? fcfa(c.hon) : "à préciser"}</td></tr>` : ""}</table>`;
@@ -1472,7 +1614,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     const lv = lienVisite("Visite de site – Le Freelancer (" + pf.num + ")", "Visite de votre terrain par l'équipe Le Freelancer.\nRéférence : " + pf.num + "\nContact : WhatsApp " + TEL);
     $i("ia-agenda").hidden = !lv; if (lv) $i("ia-agenda").href = lv;
     $i("ia-wa").hidden = !(e.client.sansMail || !e.client.email);
-    $i("ia-wa").href = "https://wa.me/22651434710?text=" + encodeURIComponent("Bonjour Le Freelancer, je suis " + (e.client.nom || "") + ". Merci de m'envoyer ma proforma " + pf.num + " sur WhatsApp.");
+    $i("ia-wa").href = lienWA();
     montrerEtape("envoi"); progres();
     // la demande part tout de suite : e-mail + visite inscrite dans l'agenda de Le Freelancer
     if (!window.__siraTest) envoyerDirect({ currentTarget: $i("ia-direct") });
@@ -1564,7 +1706,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     doc.setTextColor(...OR); doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.text("Le Freelancer", 14, 15);
     doc.setTextColor(...CLAIR); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.text(t("Proforma N° " + pf.num + "  -  " + (e.client.nom || "")), W - 14, 15, { align: "right" });
     doc.setTextColor(...NOIR); doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.text(t("RÉSUMÉ DE VOS BESOINS"), 14, 42);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...GRIS); doc.text(t("Établi à partir de votre échange avec notre chargée de projets, le " + pf.date + "."), 14, 48);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...GRIS); doc.text(t((pf.source === "formulaire" ? "Établi à partir de votre demande en ligne, le " : "Établi à partir de votre échange avec notre chargée de projets, le ") + pf.date + "."), 14, 48);
     let y2 = 58;
     const section = (titre, lignes) => {
       lignes = lignes.filter(Boolean); if (!lignes.length) return;
@@ -1615,6 +1757,16 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
   }
   async function envoyerDirect(ev) {
     const btn = ev.currentTarget; btn.disabled = true; btn.textContent = "Envoi en cours…"; $i("ia-etat").className = "ia-etat"; $i("ia-etat").textContent = "";
+    if (await transmettre()) {
+      btn.textContent = "Demande envoyée ✓"; $i("ia-etat").className = "ia-etat ok";
+      $i("ia-etat").textContent = "Merci " + (pf.e.client.nom || "") + " ! Votre demande " + pf.num + " est transmise à Le Freelancer. Pensez à télécharger votre proforma.";
+    } else {
+      btn.disabled = false; btn.textContent = "Réessayer l’envoi";
+      $i("ia-etat").textContent = "L’envoi n’a pas abouti. Réessayez dans un instant, ou contactez Le Freelancer au " + TEL + " en citant la référence " + pf.num + ".";
+    }
+  }
+  // transmission à Le Freelancer : e-mail avec PDF + visite dans l'agenda (script Google), secours FormSubmit, notification téléphone
+  async function transmettre() {
     const agenda = lienAgenda();
     let mailOk = false;
     try {
@@ -1633,14 +1785,42 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       if (!mailOk) mailOk = (await essai(true)) || (await essai(false));
     } catch (err) { mailOk = false; }
     const pushOk = await notifierTelephone(agenda);
-    if (mailOk || pushOk) {
-      btn.textContent = "Demande envoyée ✓"; $i("ia-etat").className = "ia-etat ok";
-      $i("ia-etat").textContent = "Merci " + (pf.e.client.nom || "") + " ! Votre demande " + pf.num + " est transmise à Le Freelancer. Pensez à télécharger votre proforma.";
-    } else {
-      btn.disabled = false; btn.textContent = "Réessayer l’envoi";
-      $i("ia-etat").textContent = "L’envoi n’a pas abouti. Réessayez dans un instant, ou contactez Le Freelancer au " + TEL + " en citant la référence " + pf.num + ".";
-    }
+    return mailOk || pushOk;
   }
+
+  // ---------- formulaires du site : même moteur que Sira (prix, samedis, PDF, envoi) ----------
+  function lireNiveaux(txt) {
+    const out = [];
+    for (const m of String(txt || "").matchAll(/(rdc|rez[- ]de[- ]chauss[ée]e|r\+\d|[ée]tage|sous[- ]sol)\D{0,12}?(\d{2,4})/gi)) {
+      const nom = /rdc|rez/i.test(m[1]) ? "RDC" : /sous/i.test(m[1]) ? "Sous-sol" : /r\+\d/i.test(m[1]) ? m[1].toUpperCase() : "R+1";
+      if (!out.some((x) => x.n === nom)) out.push({ n: nom, s: +m[2] });
+    }
+    if (!out.length) { const s = String(txt || "").match(/(\d{2,4})/); if (s) out.push({ n: "RDC", s: +s[1] }); }
+    return out;
+  }
+  // créneau de visite pour le formulaire : samedi choisi (ou suivant libre, même ville) et heure libre
+  function creneauFormulaire(ville, date, heure) {
+    chargerDispo();
+    const liste = (dispo || []), cle = cleVille(ville);
+    let cand = liste.filter((s) => !date || s.date >= date);
+    if (!liste.length) return { date, heure, decale: false };
+    for (const s of cand) {
+      if (s.nb >= 4) continue;
+      if (s.nb && cle && cleVille(s.ville) !== cle) continue;
+      const h = choisirHeure(s.date, heure ? heure + "h" : "matin");
+      if (h) return { date: s.date, heure: h, decale: s.date !== date || (heure && h !== +heure) };
+    }
+    return null;
+  }
+  window.LF_proforma = {
+    lireNiveaux, creneauFormulaire, jourFr, lignesDe, calcul, fcfa,
+    creer: async (e, pts) => { lignesDe(e); return creerPF(e, pts || [], "formulaire"); },
+    pdf: construirePDF,
+    telecharger: async () => { const b = await construirePDF(); if (!b) return false; const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "Proforma-LeFreelancer-" + pf.num + ".pdf"; document.body.appendChild(a); a.click(); a.remove(); return true; },
+    transmettre: () => (window.__siraTest ? Promise.resolve(true) : transmettre()),
+    lienWA: () => lienWA(),
+    lienVisite: () => lienVisite("Visite de site – Le Freelancer (" + pf.num + ")", "Visite de votre terrain par l'équipe Le Freelancer.\nRéférence : " + pf.num + "\nContact : WhatsApp " + TEL),
+  };
 
   // ---------- branchements ----------
   $i("ia-terminer").onclick = terminer;
