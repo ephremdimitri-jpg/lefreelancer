@@ -1016,6 +1016,7 @@ majHeures();
     <div id="ia-pf"></div>
     <button class="b p" type="button" id="ia-direct">Envoyer ma demande à Le Freelancer</button>
     <button class="b s" type="button" id="ia-pdf">Télécharger ma proforma (PDF)</button>
+    <a class="b" id="ia-agenda" target="_blank" rel="noopener" hidden>Ajouter la visite à mon agenda</a>
     <a class="b wa" id="ia-wa" target="_blank" rel="noopener" hidden>Recevoir ma proforma sur WhatsApp</a>
     <button class="b s" type="button" id="ia-reprendre">Revenir à la discussion</button>
     <p class="ia-etat" id="ia-etat" aria-live="polite"></p>
@@ -1070,8 +1071,8 @@ AUTRES TARIFS (FCFA ; pour ces lignes, "prix_standard" = haut de la fourchette, 
 - Pièces complémentaires du permis (plan de masse, situation, notice, mise en forme du dossier), en plus de la conception : 52 000 à 78 000 le dossier
 - Modélisation 3D simple : 65 000 à 104 000
 - Modélisation 3D d'une villa : 91 000 à 143 000
-- Rendu extérieur : 39 000 à 58 500 la vue
-- Rendu intérieur : 32 500 à 52 000 la vue
+- Rendu extérieur : 7 500 la vue (valeur standard 9 000)
+- Rendu intérieur : 7 500 la vue (valeur standard 9 000)
 - Planche A1 : 32 500 à 52 000
 - Animation courte : 78 000 à 130 000
 - Pack complet conception + 3D d'une villa : 390 000 à 520 000 le pack
@@ -1118,6 +1119,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
 "offre_presentee" : false jusqu'à ta réponse qui présente l'offre (étape 5), puis true pour toujours. "client_veut_terminer" : true quand le client veut finaliser sa commande. Ajoute ces deux champs à la racine du JSON. "projet.prestations" : ce que le client a demandé. "projet.livrables" : les documents et formats qu'il veut recevoir. "besoins" (à la racine) : liste de 4 à 12 phrases courtes résumant tous les besoins exprimés par le client (usage, chambres, style, niveaux et surfaces, prestations, livrables, contraintes du terrain, visite).
 "projet.terrain" : ce que l'on sait du site (parcelle, accès, état). "projet.rdv" : date et moment de visite proposés par le client.
 "architecte" : "demande" = true seulement si le client veut notre architecte pour la signature.
+"client" : uniquement ce que le client a réellement écrit ; un champ inconnu reste "" (jamais « [À remplir] », « inconnu » ni de valeur inventée).
 "suivi" : uniquement pour un suivi de chantier ; "visites" = nombre de visites, "par" = "semaine" ou "mois", "duree_mois" = durée du chantier en mois (0 si inconnue).
 "lignes" : VIDE tant que l'offre n'a pas été présentée (étape 2) ; ensuite les prestations retenues avec "prix_standard" = haut de la fourchette et "prix_unitaire" = prix de l'offre, entiers. "remise_pct" : remise accordée (0 à 30). Ne parle jamais de ce bloc.`;
 
@@ -1128,6 +1130,28 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
   const fcfa = (n) => Math.round(n).toLocaleString("fr-FR").replace(/[  ]/g, " ") + " FCFA";
   const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const extraireJSON = (t) => { try { const m = String(t).match(/\{[\s\S]*\}/); return m ? JSON.parse(m[0]) : null; } catch (e) { return null; } };
+
+  // ---------- visites du samedi : 4 créneaux, 2 le matin et 2 l'après-midi ----------
+  const HEURES = [8, 10, 14, 16];
+  function rdvMot(s) {
+    const h = String(s).match(/\b(\d{1,2})\s*h/i);
+    if (h && +h[1] >= 7 && +h[1] <= 18) return +h[1] + "h";
+    const m = String(s).match(/matin|apr[eè]s[- ]?midi|soir|fin de journ/i);
+    return m ? (/matin/i.test(m[0]) ? "matin" : "après-midi") : "";
+  }
+  function libresDu(date) {
+    const s = (dispo || []).find((x) => x.date === date);
+    return HEURES.filter((h) => !(s && (s.heures || []).includes(h)));
+  }
+  function choisirHeure(date, mot) {
+    const L = libresDu(date); if (!L.length) return null;
+    const matin = L.filter((h) => h < 12), aprem = L.filter((h) => h >= 12);
+    const n = (String(mot).match(/(\d{1,2})h/) || [])[1];
+    if (n) { if (L.includes(+n)) return +n; const meme = +n < 12 ? matin : aprem; return (meme.length ? meme : L).reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a); }
+    if (/apr/i.test(mot)) return (aprem[0] || matin[0]);
+    return (matin[0] || aprem[0]);
+  }
+  const libHeure = (h) => h + " h";
 
   // ---------- état : fusion de ce que Sira a noté et de ce que le client a tapé ----------
   function reperes() {
@@ -1142,8 +1166,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     let archi = null;
     if (/(pas|aucun|sans|n['’]ai pas)[^.]{0,20}architecte/i.test(tout)) archi = true; else if (/(j['’]ai|nous avons)[^.]{0,15}architecte/i.test(tout)) archi = false;
     // rendez-vous : samedi uniquement
-    const sm = tout.match(/samedi[^.,;]{0,25}?(matin|apr[eè]s[- ]?midi|soir)/i) || tout.match(/(matin|apr[eè]s[- ]?midi)[^.,;]{0,15}samedi/i);
-    const rdv = sm ? "samedi " + (sm[0].match(/matin|apr[eè]s[- ]?midi|soir/i) || [""])[0].toLowerCase() : "";
+    const sm = tout.match(/samedi[^.,;]{0,25}?(matin|apr[eè]s[- ]?midi|soir|\b\d{1,2}\s*h)/i) || tout.match(/(matin|apr[eè]s[- ]?midi|\b\d{1,2}\s*h)[^.,;]{0,15}samedi/i);
+    const rdv = sm && rdvMot(sm[0]) ? "samedi " + rdvMot(sm[0]) : "";
     // niveaux et surfaces
     const niveaux = [];
     for (const m of tout.matchAll(/(rdc|rez[- ]de[- ]chauss[ée]e|r\+\d|[ée]tage|1er [ée]tage|premier [ée]tage|sous[- ]sol)\D{0,12}?(\d{2,4})\s*m/gi)) { const nom = /rdc|rez/i.test(m[1]) ? "RDC" : /sous/i.test(m[1]) ? "Sous-sol" : /r\+\d/i.test(m[1]) ? m[1].toUpperCase() : "R+1"; if (!niveaux.some((x) => x.n === nom)) niveaux.push({ n: nom, s: +m[2] }); }
@@ -1153,11 +1177,11 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       if (histo[k].role !== "user" || histo[k - 1].role !== "assistant") continue;
       const q = histo[k - 1].content, rep = histo[k].content.trim();
       if (/\bnom\b/i.test(q) && !nomCourt) { const m = rep.match(/^((?:[A-Za-zÀ-ÿ'’-]{2,}\s*){1,4})/); if (m && !/^(oui|non|bonjour|merci|d'accord|ok)\b/i.test(m[1])) nomCourt = m[1].trim(); }
-      if (/samedi|visite/i.test(q)) { const m = rep.match(/matin|apr[eè]s[- ]?midi|soir|fin de journ[ée]e/i); if (m) rdvCourt = "samedi " + (/matin/i.test(m[0]) ? "matin" : "après-midi"); }
+      if (/samedi|visite/i.test(q)) { const v = rdvMot(rep); if (v) rdvCourt = "samedi " + v; }
       if (/surface|m²|m2/i.test(q)) { const m = rep.match(/(\d{2,4})\s*(m²|m2|m\b|mètres)/i) || rep.match(/^\s*(\d{2,4})\s*$/); if (m && !/parcelle|terrain/i.test(rep)) surfCourte = +m[1]; }
     }
     const nomFinal = nm ? nm[1].trim().replace(/[,.]$/, "") : nomCourt;
-    const rdvFinal = rdv ? rdv.replace(/soir|fin de journ[ée]e/i, "après-midi") : rdvCourt;
+    const rdvFinal = rdvCourt || rdv; // la dernière réponse du client à la question du rendez-vous prime
     if (!niveaux.length && surfCourte) {
       // une seule surface donnée : on l'applique à chaque niveau évoqué (RDC par défaut)
       const nv = ["RDC"]; for (const m of tout.matchAll(/r\+(\d)/gi)) if (!nv.includes("R+" + m[1])) nv.push("R+" + m[1]);
@@ -1173,7 +1197,10 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     const e = etat || { points: [], client: {}, projet: {}, lignes: [], remise_pct: 0 };
     if (d) {
       if (Array.isArray(d.points) && d.points.length) e.points = d.points.filter(Boolean).slice(0, 10);
-      for (const k of ["nom", "entreprise", "telephone", "email", "ville"]) if (d.client && d.client[k]) e.client[k] = String(d.client[k]);
+      // coordonnées : on refuse les valeurs bidon que l'IA invente (« [À remplir] », « inconnu »…)
+      const vide = (v) => !v || /[\[\]<>{}]|remplir|inconnu|non (pr[ée]cis|communiqu|renseign)|n\/a|^\W*$|^(nom|client|t[ée]l[ée]phone|e-?mail|x+)$/i.test(String(v).trim());
+      const okCl = { nom: (v) => !vide(v) && /[a-zà-ÿ]{2}/i.test(v), entreprise: (v) => !vide(v), telephone: (v) => !vide(v) && String(v).replace(/\D/g, "").length >= 8, email: (v) => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(String(v).trim()), ville: (v) => !vide(v) };
+      for (const k of ["nom", "entreprise", "telephone", "email", "ville"]) if (d.client && d.client[k] && okCl[k](d.client[k])) e.client[k] = String(d.client[k]).trim();
       if (d.client_veut_terminer === true) e.fin = true;
       if (Array.isArray(d.besoins) && d.besoins.length) e.besoins = d.besoins.filter(Boolean).map(String).slice(0, 12);
       // la date de visite ne vient que des mots du client (jamais de la proposition de Sira)
@@ -1196,9 +1223,12 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     if (r.sansMail) { e.client.sansMail = true; if (!/@/.test(e.client.email || "")) e.client.email = ""; }
     if (r.livrables && !e.projet.livrables) e.projet.livrables = r.livrables;
     if (r.niveaux.length && !(e.niveaux && e.niveaux.length)) e.niveaux = r.niveaux;
-    if (r.rdv && !e.projet.rdvDate) {
-      const sp = samediPropose(e.client.ville || e.projet.lieu);
-      if (sp) { e.projet.rdvDate = sp.date; e.projet.rdv = jourFr(sp.date) + ", " + r.rdv.replace(/^samedi\s*/i, ""); } else e.projet.rdv = r.rdv;
+    if (r.rdv && r.rdv !== e.projet.rdvSrc) {
+      // date : celle déjà retenue, sinon le prochain samedi disponible (même ville, moins de 4 visites)
+      const sp = e.projet.rdvDate ? { date: e.projet.rdvDate } : samediPropose(e.client.ville || e.projet.lieu);
+      const h = sp ? choisirHeure(sp.date, r.rdv) : null;
+      if (sp && h) { e.projet.rdvDate = sp.date; e.projet.rdvHeure = h; e.projet.rdv = jourFr(sp.date) + " à " + libHeure(h); e.projet.rdvSrc = r.rdv; }
+      else if (!sp) e.projet.rdv = r.rdv;
     }
     if (e.projet.rdvDate) e.projet.rdv = e.projet.rdv && /samedi/i.test(e.projet.rdv) ? e.projet.rdv : jourFr(e.projet.rdvDate);
     if (e.projet.rdv && !/samedi|non souhait|pas de visite/i.test(e.projet.rdv)) delete e.projet.rdv; // visites le samedi uniquement
@@ -1208,9 +1238,18 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       if (e.niveaux && e.niveaux.length) { L = L.filter((l) => !/conception|forfait|\bF[2-6]\b|duplex|villa/i.test(l.d)); L.unshift(...e.niveaux.map((n) => ({ d: `Conception ${n.n} : ${n.s} m² à aménager`, q: n.s, u: "m²", pu: 1300, ps: 1500 }))); }
       // signature de l'architecte : +10 % intégrés aux prestations de conception, sans ligne séparée
       e.partArchi = 0;
-      if (e.archi && e.archi.demande && L.length) {
-        L = L.map((l) => { const pu = Math.round(l.pu * 1.1), ps = Math.round(l.ps * 1.1); e.partArchi += (pu - l.pu) * l.q; return { ...l, pu, ps }; });
-        L[0] = { ...L[0], d: L[0].d + " (signature de l’architecte incluse)" };
+      // rendus 3D : prix fixe 7 500 F la vue (intérieur comme extérieur), valeur standard 9 000 F
+      L = L.map((l) => /rendu|perspective|\bvues?\b/i.test(l.d) && !/anim/i.test(l.d) ? { ...l, pu: 7500, ps: 9000 } : l);
+      // la signature de l'architecte ne porte que sur la conception (pas sur la 3D, les rendus ni le suivi)
+      const archiSur = (l) => !/rendu|perspective|\bvues?\b|3d|mod[ée]lisation|anim|planche/i.test(l.d);
+      if (e.archi && e.archi.demande && L.some(archiSur)) {
+        let premier = true;
+        L = L.map((l) => {
+          if (!archiSur(l)) return l;
+          const pu = Math.round(l.pu * 1.1), ps = Math.round(l.ps * 1.1); e.partArchi += (pu - l.pu) * l.q;
+          const d = premier ? l.d + " (signature de l’architecte incluse)" : l.d; premier = false;
+          return { ...l, d, pu, ps };
+        });
       }
       // renfort d'équipe à l'heure : 3 250 F à distance, 3 900 F en présentiel (+20 %)
       if (e.renfort) {
@@ -1218,7 +1257,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
         if (hd > 0) L.push({ d: `Renfort d’équipe à distance : ${hd} h par semaine pendant ${dur}`, q: hd * R.sem, u: "h", pu: 3250, ps: 3750, suivi: true });
         if (R.hp > 0) L.push({ d: `Renfort d’équipe en présentiel : ${R.hp} h par semaine pendant ${dur}`, q: R.hp * R.sem, u: "h", pu: 3900, ps: 4500, suivi: true });
       }
-      if (e.suivi) { const s = e.suivi, n = s.v * (s.par === "semaine" ? 4 : 1) * (s.mois || 1); L.push({ d: `Suivi de chantier : ${s.v} visite${s.v > 1 ? "s" : ""} par ${s.par}${s.mois ? " pendant " + s.mois + " mois" : " (sur 1 mois, durée à préciser)"}`, q: n, u: "visite", pu: 30000, ps: 39000, suivi: true }); }
+      if (e.suivi) { const s = e.suivi, n = s.v * (s.par === "semaine" ? 4 : 1) * (s.mois || 1); L.push({ d: `Suivi de chantier : ${s.v} visite${s.v > 1 ? "s" : ""} par ${s.par}${s.mois ? " pendant " + s.mois + " mois" : " (base 1 mois)"}`, q: n, u: "visite", pu: 30000, ps: 39000, suivi: true }); }
       e.lignes = L;
     }
     etat = e; progres(); return e;
@@ -1312,9 +1351,10 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     if (!liste.length) { const d = new Date(); d.setDate(d.getDate() + 1); while (d.getDay() !== 6) d.setDate(d.getDate() + 1); const z = (n) => String(n).padStart(2, "0"); liste = [{ date: d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()), nb: 0, ville: "" }]; }
     const cle = cleVille(ville), premier = liste[0];
     for (const s of liste) {
-      if (s.nb >= 4) continue;
+      if (s.nb >= 4 || !libresDu(s.date).length) continue;
       if (s.nb && cle && cleVille(s.ville) !== cle) continue;
-      return { date: s.date, decale: s.date !== premier.date, premier: premier.date };
+      const L = libresDu(s.date);
+      return { date: s.date, decale: s.date !== premier.date, premier: premier.date, matin: L.find((h) => h < 12), aprem: L.find((h) => h >= 12) };
     }
     return null;
   }
@@ -1330,8 +1370,12 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       const ville = e.client.ville || p.lieu, sp = ville ? samediPropose(ville) : null;
       if (!ville) etape = "ÉTAPE RENDEZ-VOUS : demande d'abord dans quelle ville se trouve le terrain, pour programmer la visite ; pas de prix.";
       else if (!sp) etape = "ÉTAPE RENDEZ-VOUS : nos samedis des prochaines semaines sont complets ; excuse-toi pour notre programme chargé, rassure le client sur notre volonté de travailler sur son projet et dis que l'équipe le rappellera pour fixer la date ; pas de prix.";
-      else if (sp.decale) etape = "ÉTAPE RENDEZ-VOUS : les visites ont lieu uniquement le samedi. Le " + jourFr(sp.premier) + " est déjà réservé (autre ville ou complet) : présente nos excuses pour notre programme chargé, rassure le client sur notre volonté de travailler sur son projet, et propose-lui le " + jourFr(sp.date) + ", le matin ou l'après-midi. N'invente aucune autre date ; pas de prix.";
-      else etape = "ÉTAPE RENDEZ-VOUS : propose une visite du site le " + jourFr(sp.date) + " (les visites ont lieu uniquement le samedi), le matin ou l'après-midi. N'invente aucune autre date ; pas de prix.";
+      else {
+        const choix = [sp.matin, sp.aprem].filter((h) => h).map((h) => "à " + libHeure(h)).join(" ou ");
+        const creneau = jourFr(sp.date) + " " + choix;
+        if (sp.decale) etape = "ÉTAPE RENDEZ-VOUS : les visites ont lieu uniquement le samedi. Le " + jourFr(sp.premier) + " est déjà réservé (autre ville ou complet) : présente nos excuses pour notre programme chargé, rassure le client sur notre volonté de travailler sur son projet, et propose-lui une visite le " + creneau + ". Donne exactement ces heures, n'invente aucune autre date ni heure ; pas de prix.";
+        else etape = "ÉTAPE RENDEZ-VOUS : propose une visite du site le " + creneau + " (les visites ont lieu uniquement le samedi, le créneau est chargé). Donne exactement ces heures, n'invente aucune autre date ni heure ; pas de prix.";
+      }
     }
     else if (!off && n < 7 && (n < 4 || conceptionSansSurface)) etape = "ÉTAPE PROJET : parle de ses besoins comme un architecte (pour qui, chambres, style, échéance) et obtiens les niveaux voulus avec la surface à aménager de chacun en m²" + (/suivi/.test(p.prestations || "") ? " ; pour le suivi : nombre de visites par semaine ou par mois et durée" : " ; ne parle PAS de suivi ni de visites de chantier, le client ne l'a pas demandé") + " ; UNE question, pas de prix.";
     else if (!off && !p.prestations && n < 8) etape = "ÉTAPE CE QUE VEUT LE CLIENT : demande-lui précisément quelles prestations il souhaite (conception, dossier de permis, rendus 3D, suivi de chantier…) ; pas encore de prix.";
@@ -1342,6 +1386,10 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     else if (!cl.email && !cl.sansMail && histo.filter((m) => m.role === "assistant" && /e-?mail/i.test(m.content)).length < 1) etape = "ÉTAPE COORDONNÉES : demande l'e-mail en précisant qu'il est facultatif (s'il n'en a pas, ce n'est pas grave).";
     else etape = "ÉTAPE FIN : remercie et invite le client à cliquer sur « Finaliser ma commande » pour recevoir sa proforma. Pas de récapitulatif chiffré.";
     const deja = [p.lieu && "lieu : " + p.lieu, p.terrain && "terrain : " + p.terrain, p.rdv && "visite : " + p.rdv, p.prestations && "prestations : " + p.prestations, p.livrables && "livrables : " + p.livrables, e.niveaux && e.niveaux.length && "niveaux : " + e.niveaux.map((x) => x.n + " " + x.s + " m²").join(", "), e.archi && (e.archi.demande ? "pas d'architecte : le nôtre signera" : "a déjà un architecte"), e.client.sansMail && "le client N'A PAS d'e-mail : ne le redemande jamais"].filter(Boolean).join(" ; ");
+    // visite tout juste fixée : Sira l'annonce avec l'heure exacte (une seule fois)
+    const dernierBot = (histo.filter((m) => m.role === "assistant").pop() || {}).content || "";
+    if (p.rdvHeure && !histo.some((m) => m.role === "assistant" && m.content.includes(p.rdvHeure + " h")) && dernierBot)
+      etape = "Commence par confirmer la visite du site fixée au " + p.rdv + " (annonce cette heure exacte, pas seulement « matin » ou « après-midi »), puis : " + etape;
     // remise demandée au-delà du possible : refus poliment, sans jamais l'accepter
     const derniere = (histo.filter((m) => m.role === "user").pop() || {}).content || "";
     const pct = (derniere.match(/(\d{2,3})\s*(%|pour ?cent|per ?cent|pourcent)/i) || [])[1];
@@ -1420,9 +1468,14 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     pdfBlob = null; $i("ia-etat").textContent = ""; $i("ia-etat").className = "ia-etat";
     $i("ia-direct").disabled = false; $i("ia-direct").textContent = "Envoyer ma demande à Le Freelancer";
     // client sans e-mail : il demande sa proforma sur WhatsApp (message déjà rédigé, à envoyer à Le Freelancer)
+    // visite fixée : le client l'ajoute à son propre agenda (Google Agenda, ou téléphone)
+    const lv = lienVisite("Visite de site – Le Freelancer (" + pf.num + ")", "Visite de votre terrain par l'équipe Le Freelancer.\nRéférence : " + pf.num + "\nContact : WhatsApp " + TEL);
+    $i("ia-agenda").hidden = !lv; if (lv) $i("ia-agenda").href = lv;
     $i("ia-wa").hidden = !(e.client.sansMail || !e.client.email);
     $i("ia-wa").href = "https://wa.me/22651434710?text=" + encodeURIComponent("Bonjour Le Freelancer, je suis " + (e.client.nom || "") + ". Merci de m'envoyer ma proforma " + pf.num + " sur WhatsApp.");
     montrerEtape("envoi"); progres();
+    // la demande part tout de suite : e-mail + visite inscrite dans l'agenda de Le Freelancer
+    if (!window.__siraTest) envoyerDirect({ currentTarget: $i("ia-direct") });
   }
 
   // ---------- PDF de la proforma ----------
@@ -1464,7 +1517,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     doc.text("DESIGNATION", 18, y); doc.text("QTE", 120, y, { align: "right" }); doc.text("PRIX UNITAIRE", 157, y, { align: "right" }); doc.text("MONTANT", W - 18, y, { align: "right" });
     y += 9; doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...NOIR);
     if (!e.lignes.length) { doc.text("Prestations sur devis : chiffrage après étude du dossier.", 18, y); y += 9; }
-    e.lignes.forEach((l, k) => { const d = doc.splitTextToSize(t(l.d), 90), h = 6 * d.length + 3; if (k % 2 === 0) { doc.setFillColor(250, 248, 243); doc.rect(14, y - 5, W - 28, h, "F"); } doc.text(d, 18, y); doc.text(t(l.q + " " + (l.u !== "u" ? l.u : "")), 120, y, { align: "right" }); doc.text(m(l.pu), 157, y, { align: "right" }); doc.text(m(l.q * l.pu), W - 18, y, { align: "right" }); y += h; });
+    e.lignes.forEach((l, k) => { const d = doc.splitTextToSize(t(l.d), 80), h = 6 * d.length + 3; if (k % 2 === 0) { doc.setFillColor(250, 248, 243); doc.rect(14, y - 5, W - 28, h, "F"); } doc.text(d, 18, y); doc.text(t(l.q + (l.u === "m²" || l.u === "h" ? " " + l.u : "")), 120, y, { align: "right" }); doc.text(m(l.pu), 157, y, { align: "right" }); doc.text(m(l.q * l.pu), W - 18, y, { align: "right" }); y += h; });
     doc.setDrawColor(...OR); doc.setLineWidth(.6); doc.line(14, y - 2, W - 14, y - 2);
     // totaux
     y += 6; const tot = (k, v, fort) => { doc.setFont("helvetica", fort ? "bold" : "normal"); doc.setFontSize(fort ? 12 : 10); doc.setTextColor(...NOIR); doc.text(k, 118, y); doc.text(v, W - 18, y, { align: "right" }); y += fort ? 9 : 6.5; };
@@ -1483,11 +1536,16 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       y += 5;
     }
     // conditions
-    y = Math.max(y + 4, 214); doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...OR); doc.text("CONDITIONS", 14, y); y += 5;
+    // pas assez de place sous les totaux : conditions et signature passent sur une page à part
+    if (y + 4 > 214) {
+      doc.setFillColor(...NOIR); doc.rect(0, H - 10, W, 10, "F"); doc.setTextColor(...CLAIR); doc.setFontSize(7.5);
+      doc.text(t("Le Freelancer - Partenaire technique et graphique des professionnels du BTP - Document sans valeur fiscale"), W / 2, H - 4, { align: "center" });
+      doc.addPage(); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...NOIR); doc.text(t("FACTURE PROFORMA " + pf.num + " (suite)"), 14, 22); y = 34;
+    } else y = Math.max(y + 4, 214); doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...OR); doc.text("CONDITIONS", 14, y); y += 5;
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
     ["50 % d'acompte au démarrage, solde avant la livraison des fichiers finaux.", "Deux séries de corrections incluses dans le périmètre convenu ; urgences et déplacements en supplément.", "Montants établis d'après l'échange avec le client, confirmés après étude des documents.", "Signature des plans et maîtrise d'œuvre assurées par des architectes partenaires inscrits à l'Ordre."].forEach((s) => { doc.text(t("- " + s), 14, y); y += 4.6; });
     // signature électronique : cachet + empreinte + QR
-    const sy = Math.min(262, Math.max(250, y + 14));
+    const sy = y < 200 ? y + 12 : Math.max(250, y + 10);
     doc.setDrawColor(...OR); doc.setLineWidth(.8); doc.circle(40, sy + 8, 15); doc.setLineWidth(.3); doc.circle(40, sy + 8, 12.5);
     doc.setTextColor(...OR); doc.setFont("helvetica", "bold"); doc.setFontSize(6.5); doc.text("LE FREELANCER", 40, sy + 3.5, { align: "center" }); doc.setFontSize(5); doc.text("SIGNE", 40, sy + 7.3, { align: "center" }); doc.text("ELECTRONIQUEMENT", 40, sy + 10, { align: "center" }); doc.setFontSize(5.5); doc.text(t(pf.date), 40, sy + 14, { align: "center" });
     doc.setTextColor(...NOIR); doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.text("Signature électronique", 62, sy + 1);
@@ -1535,7 +1593,16 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
   }
 
   // ---------- envoi : e-mail (avec PDF) + notification téléphone + lien agenda ----------
+  // lien Google Agenda pour la visite du samedi (heure du Burkina, 1 h 30)
+  function lienVisite(titre, details, lieu) {
+    const p = pf && pf.e.projet; if (!p || !p.rdvDate || !p.rdvHeure) return "";
+    const z = (n) => String(n).padStart(2, "0"), j = p.rdvDate.replace(/-/g, "");
+    const deb = j + "T" + z(p.rdvHeure) + "0000", fin = j + "T" + z(p.rdvHeure + 1) + "3000";
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(titre) + "&dates=" + deb + "/" + fin + "&ctz=Africa/Ouagadougou&details=" + encodeURIComponent(details) + "&location=" + encodeURIComponent(lieu || p.lieu || "");
+  }
   function lienAgenda() {
+    const lv = lienVisite("Visite de site – " + (pf.e.client.nom || "client") + " (" + pf.num + ")", resumeTxt.slice(0, 1500));
+    if (lv) return lv;
     const d = new Date(Date.now() + 864e5); d.setUTCHours(9, 0, 0, 0); const f = new Date(d.getTime() + 36e5);
     const iso = (x) => x.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
     const e = pf.e, titre = "Rappeler " + (e.client.nom || "client") + " – " + (e.projet.nature || "demande") + " (" + pf.num + ")";
@@ -1562,7 +1629,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       };
       const b64 = b ? await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(",")[1] || ""); fr.onerror = () => ok(""); fr.readAsDataURL(b); }) : "";
       const e2 = pf.e;
-      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: "Nouvelle demande " + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", reference: pf.num });
+      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: "Nouvelle demande " + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", rdvHeure: e2.projet.rdvHeure || "", reference: pf.num });
       if (!mailOk) mailOk = (await essai(true)) || (await essai(false));
     } catch (err) { mailOk = false; }
     const pushOk = await notifierTelephone(agenda);
