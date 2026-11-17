@@ -644,6 +644,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
         <pre id="r-texte">Remplissez le formulaire puis cliquez sur « Résumer ma demande ».</pre>
         <div class="envoi" id="r-envoi" hidden>
           <p class="ok" id="r-etat" aria-live="polite"></p>
+          <button class="btn fx-shimmer" type="button" id="r-payer" hidden>Payer mon acompte</button>
           <button class="btn" type="button" id="r-pdf">Télécharger ma proforma (PDF)</button>
           <a class="btn" id="r-wapf" target="_blank" rel="noopener" style="background:#25d366;border-color:#25d366;color:#fff">Recevoir ma proforma sur WhatsApp</a>
           <a class="btn ligne" id="r-agenda" target="_blank" rel="noopener" hidden>Ajouter la visite à mon agenda</a>
@@ -916,6 +917,7 @@ async function proformaFormulaire(e, titre, pts) {
     "\n\n— Vos coordonnées —\n" + e.client.nom + "\n" + e.client.telephone + (e.client.email ? "\n" + e.client.email : "");
   afficher(titre, "Demande " + pfForm.num + " – " + e.client.nom, texte);
   $("#r-wapf").href = P.lienWA();
+  const ac = P.acompte(); $("#r-payer").hidden = !ac; if (ac) $("#r-payer").textContent = "Payer mon acompte (" + ac + ")";
   const lv = P.lienVisite(); $("#r-agenda").hidden = !lv; if (lv) $("#r-agenda").href = lv;
   // la demande part tout de suite : e-mail avec PDF + visite dans l'agenda de Le Freelancer
   $("#r-etat").textContent = "Envoi de votre demande à Le Freelancer…"; $("#r-direct").hidden = true;
@@ -957,6 +959,7 @@ $("#form-assist").addEventListener("submit", (e) => {
   proformaFormulaire(etatAssist(), "Votre proforma · " + f.value + " · " + mode, c.split("\n").filter((l) => / : /.test(l) && !/Entreprise|Personne|Téléphone|E-mail/.test(l)).slice(0, 12));
 });
 let envoye = false;
+$("#r-payer").addEventListener("click", () => { if (window.LF_proforma && pfForm) window.LF_proforma.payer(); });
 $("#r-pdf").addEventListener("click", async () => { if (!window.LF_proforma || !pfForm) return; const ok = await window.LF_proforma.telecharger(); if (!ok) $("#r-etat").textContent = "La proforma n’a pas pu être générée, réessayez."; });
 $("#r-direct").addEventListener("click", async (e) => {
   const b = e.currentTarget; if (envoye) return;
@@ -1377,6 +1380,26 @@ majHeures();
 .ia-etape .s { background: var(--fond-2); color: var(--encre); border: 1.5px solid var(--filet); }
 .ia-etat { font-size: 13px; color: var(--gris); min-height: 1em; margin: 0; }
 .ia-etat.ok { color: #2a8f4a; font-weight: 600; }
+/* paiement de l'acompte par mobile money */
+.pay-fond { position: fixed; inset: 0; z-index: 80; background: rgba(10,10,9,.62); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; }
+.pay-fond[hidden] { display: none; }
+.pay { width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; background: var(--fond); color: var(--encre); border-radius: 16px; padding: 22px; display: grid; gap: 14px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.7); border-top: 4px solid #f0a91c; }
+.pay h3 { margin: 0; font: 900 24px var(--f-titre); }
+.pay .mt { background: var(--fond-2); border-radius: 12px; padding: 14px; display: grid; gap: 2px; }
+.pay .mt b { font: 900 30px var(--f-titre); color: #d7920f; font-variant-numeric: tabular-nums; }
+.pay .mt span { font-size: 13px; color: var(--gris); }
+.pay .op { border: 1.5px solid var(--filet); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.pay .op .h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pay .op .h b { font: 800 16px var(--f-texte); }
+.pay .op .h i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: -1px; }
+.pay .num { font: 700 20px var(--f-cote); letter-spacing: .04em; }
+.pay .lgn { display: flex; gap: 8px; flex-wrap: wrap; }
+.pay .lgn a, .pay .lgn button, .pay .fin button, .pay .fin a { font: 700 14px var(--f-texte); border-radius: 999px; padding: 9px 14px; cursor: pointer; border: 1.5px solid var(--filet); background: transparent; color: var(--encre); text-decoration: none; }
+.pay .etapes { margin: 0; padding-left: 20px; font-size: 14px; color: var(--gris); display: grid; gap: 4px; }
+.pay .ref { font: 700 15px var(--f-cote); color: var(--encre); }
+.pay .fin { display: grid; gap: 8px; }
+.pay .fin .ok { background: #25d366; border-color: #25d366; color: #fff; text-align: center; }
+.pay .fin .x { justify-self: center; border: 0; color: var(--gris); }
 @media (max-width: 520px) { .ia-panneau { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; } .ia-bulle { max-width: 190px; } }
 </style>
 
@@ -1403,6 +1426,7 @@ majHeures();
     <h4>2 · Votre proforma est prête</h4>
     <div id="ia-pf"></div>
     <button class="b p" type="button" id="ia-direct">Envoyer ma demande à Le Freelancer</button>
+    <button class="b p" type="button" id="ia-payer" hidden>Payer mon acompte</button>
     <button class="b s" type="button" id="ia-pdf">Télécharger ma proforma (PDF)</button>
     <a class="b" id="ia-agenda" target="_blank" rel="noopener" hidden>Ajouter la visite à mon agenda</a>
     <a class="b wa" id="ia-wa" target="_blank" rel="noopener" hidden>Recevoir ma proforma sur WhatsApp</a>
@@ -1411,11 +1435,18 @@ majHeures();
   </div>
 </section>
 
+<div class="pay-fond" id="pay" hidden><div class="pay" role="dialog" aria-modal="true" aria-labelledby="pay-t"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (() => {
   const TEL = "+226 51 43 47 10";
+  // >>> PAIEMENT DE L'ACOMPTE PAR MOBILE MONEY : numéros qui reçoivent l'argent (vide = opérateur masqué) <<<
+  const PAIEMENT = [
+    { id: "orange", nom: "Orange Money", couleur: "#ff7900", num: "64 18 33 26", code: "*144#" },
+    { id: "moov", nom: "Moov Money", couleur: "#0067b1", num: "51 43 47 10", code: "*555#" },
+  ].filter((o) => o.num);
   // secours FormSubmit : code « alias » (sans adresse e-mail visible) ; vide = désactivé, le script Google et la notification suffisent
   const FS_ALIAS = "";
   // Notifications téléphone : application gratuite « ntfy » abonnée à ce sujet
@@ -1857,12 +1888,32 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       "\n— Projet —\n" + L("Nature", e.projet.nature) + L("Lieu", e.projet.lieu) + L("Site / terrain", e.projet.terrain) + L("RENDEZ-VOUS VISITE DU SITE", e.projet.rdv) + L("Délai", e.projet.delai) + L("Prestations", e.projet.prestations) + L("Livrables", e.projet.livrables) + L("Niveaux", (e.niveaux || []).map((n) => n.n + " " + n.s + " m²").join(", ")) +
       (e.besoins && e.besoins.length ? "\n— Besoins exprimés —\n" + e.besoins.map((b) => "• " + b).join("\n") + "\n" : "") +
       "\n— Points clés validés par le client —\n" + pts.map((p) => "✓ " + p).join("\n") +
-      (e.lignes.length ? "\n\n— Proforma —\n" + e.lignes.map((l) => `- ${l.d} : ${l.q} × ${fcfa(l.pu)} = ${fcfa(l.q * l.pu)}`).join("\n") + (e.remise_pct ? `\nRemise ${e.remise_pct} % : − ${fcfa(c.remise)}` : "") + (c.eco > 0 ? `\nValeur standard : ${fcfa(c.standard)} (économie client : ${fcfa(c.eco)})` : "") + `\nTOTAL CONCEPTION : ${fcfa(c.net)}\nAcompte 50 % : ${fcfa(c.acompte)}` : "\n\nProforma : prestations sur devis, à chiffrer.") +
+      (e.lignes.length ? "\n\n— Proforma —\n" + e.lignes.map((l) => `- ${l.d} : ${l.q} × ${fcfa(l.pu)} = ${fcfa(l.q * l.pu)}`).join("\n") + (e.remise_pct ? `\nRemise ${e.remise_pct} % : − ${fcfa(c.remise)}` : "") + (c.eco > 0 ? `\nValeur standard : ${fcfa(c.standard)} (économie client : ${fcfa(c.eco)})` : "") + `\nTOTAL CONCEPTION : ${fcfa(c.net)}\nAcompte 50 % : ${fcfa(c.acompte)}` + (PAIEMENT.length ? "\nPaiement de l'acompte : par mobile money (" + PAIEMENT.map((o) => o.nom + " " + o.num).join(" / ") + "), référence " + pf.num + ". Le client vous préviendra sur WhatsApp : vérifiez la réception avant de démarrer." : "") : "\n\nProforma : prestations sur devis, à chiffrer.") +
       (e.partArchi ? `\n\n— Interne (non visible du client) —\nPart architecte incluse dans les prix (10 %, avant remise) : ${fcfa(e.partArchi)}` : "") +
       "\n\nEmpreinte de la proforma (SHA-256) : " + pf.hash;
     return pf;
   }
   const lienWA = () => "https://wa.me/22651434710?text=" + encodeURIComponent("Bonjour Le Freelancer, je suis " + (pf.e.client.nom || "") + ". Merci de m'envoyer ma proforma " + pf.num + " sur WhatsApp.");
+  // ---------- paiement de l'acompte (mobile money) ----------
+  function ouvrirPaiement() {
+    if (!pf || !pf.e.lignes.length || !PAIEMENT.length) return;
+    const fond = $i("pay"), boite = fond.querySelector(".pay"), mt = fcfa(pf.c.acompte);
+    const echap = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    boite.innerHTML = `<h3 id="pay-t">Payer mon acompte</h3>
+      <div class="mt"><span>Acompte de 50 % · proforma ${pf.num}</span><b>${mt}</b><span>Le solde sera réglé avant la livraison des fichiers finaux.</span></div>
+      ${PAIEMENT.map((o) => `<div class="op"><div class="h"><b><i style="background:${o.couleur}"></i>${o.nom}</b><a href="tel:${encodeURIComponent(o.code)}">Ouvrir ${o.code}</a></div>
+        <div class="lgn"><span class="num">${o.num}</span><button type="button" data-copie="${o.num.replace(/\s/g, "")}">Copier le numéro</button></div></div>`).join("")}
+      <ol class="etapes"><li>Composez le code de votre opérateur et choisissez le transfert d’argent.</li><li>Envoyez <b>${mt}</b> au numéro ci-dessus.</li><li>Indiquez la référence <span class="ref">${pf.num}</span> si l’on vous demande un motif.</li><li>Cliquez sur « J’ai payé » : le responsable confirme la réception.</li></ol>
+      <div class="fin"><a class="ok" target="_blank" rel="noopener" id="pay-ok">J’ai payé : prévenir le responsable</a><button type="button" class="x" id="pay-x">Fermer</button></div>`;
+    const msg = "Bonjour Le Freelancer, je viens de payer l'acompte de " + mt + " pour la proforma " + pf.num + (pf.e.client.nom ? " (" + pf.e.client.nom + ")" : "") + ". Merci de confirmer la réception.";
+    $i("pay-ok").href = "https://wa.me/22651434710?text=" + encodeURIComponent(msg);
+    boite.querySelectorAll("[data-copie]").forEach((b) => b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(b.dataset.copie); b.textContent = "Copié ✓"; } catch (e) { b.textContent = b.dataset.copie; } }));
+    $i("pay-x").onclick = () => (fond.hidden = true);
+    fond.onclick = (e) => { if (e.target === fond) fond.hidden = true; };
+    fond.hidden = false; $i("pay-x").focus();
+  }
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$i("pay").hidden) $i("pay").hidden = true; });
+  const texteAcompte = () => PAIEMENT.length ? "Acompte payable par " + PAIEMENT.map((o) => o.nom + " au " + o.num).join(" ou ") + ", en indiquant la référence " + pf.num + "." : "";
   async function valider() {
     const pts = [...$i("ia-points").querySelectorAll("label")].filter((l) => l.querySelector("input").checked).map((l) => l.textContent.trim());
     const e = etat; await creerPF(e, pts, "sira"); const c = pf.c;
@@ -1879,6 +1930,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     $i("ia-agenda").hidden = !lv; if (lv) $i("ia-agenda").href = lv;
     $i("ia-wa").hidden = !(e.client.sansMail || !e.client.email);
     $i("ia-wa").href = lienWA();
+    $i("ia-payer").hidden = !(e.lignes.length && PAIEMENT.length);
+    $i("ia-payer").textContent = "Payer mon acompte (" + fcfa(pf.c.acompte) + ")";
     montrerEtape("envoi"); progres();
     // la demande part tout de suite : e-mail + visite inscrite dans l'agenda de Le Freelancer
     if (!window.__siraTest) envoyerDirect({ currentTarget: $i("ia-direct") });
@@ -1949,7 +2002,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
       doc.addPage(); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...NOIR); doc.text(t("FACTURE PROFORMA " + pf.num + " (suite)"), 14, 22); y = 34;
     } else y = Math.max(y + 4, 214); doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...OR); doc.text("CONDITIONS", 14, y); y += 5;
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
-    ["50 % d'acompte au démarrage, solde avant la livraison des fichiers finaux.", "Deux séries de corrections incluses dans le périmètre convenu ; urgences et déplacements en supplément.", "Montants établis d'après l'échange avec le client, confirmés après étude des documents.", "Signature des plans et maîtrise d'œuvre assurées par des architectes partenaires inscrits à l'Ordre."].forEach((s) => { doc.text(t("- " + s), 14, y); y += 4.6; });
+    ["50 % d'acompte au démarrage, solde avant la livraison des fichiers finaux.", "Deux séries de corrections incluses dans le périmètre convenu ; urgences et déplacements en supplément.", "Montants établis d'après l'échange avec le client, confirmés après étude des documents.", "Signature des plans et maîtrise d'œuvre assurées par des architectes partenaires inscrits à l'Ordre.", e.lignes.length && texteAcompte()].filter(Boolean).forEach((s) => { doc.splitTextToSize(t("- " + s), W - 28).forEach((l) => { doc.text(l, 14, y); y += 4.6; }); });
     // signature électronique : cachet + empreinte + QR
     const sy = y < 200 ? y + 12 : Math.max(250, y + 10);
     doc.setDrawColor(...OR); doc.setLineWidth(.8); doc.circle(40, sy + 8, 15); doc.setLineWidth(.3); doc.circle(40, sy + 8, 12.5);
@@ -2101,6 +2154,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     lireNiveaux, creneauFormulaire, jourFr, lignesDe, calcul, fcfa,
     creer: async (e, pts) => { lignesDe(e); return creerPF(e, pts || [], "formulaire"); },
     pdf: construirePDF,
+    payer: ouvrirPaiement, acompte: () => (pf && pf.e.lignes.length && PAIEMENT.length ? fcfa(pf.c.acompte) : ""),
     telecharger: async () => { const b = await construirePDF(); if (!b) return false; const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "Proforma-LeFreelancer-" + pf.num + ".pdf"; document.body.appendChild(a); a.click(); a.remove(); return true; },
     transmettre: () => (window.__siraTest ? Promise.resolve(true) : transmettre()),
     lienWA: () => lienWA(),
@@ -2113,6 +2167,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
   $i("ia-retour").onclick = () => { montrerEtape(null); texte.focus(); };
   $i("ia-reprendre").onclick = () => { montrerEtape(null); texte.focus(); };
   $i("ia-pdf").onclick = telecharger;
+  $i("ia-payer").onclick = ouvrirPaiement;
   $i("ia-direct").onclick = envoyerDirect;
   $i("ia-form").addEventListener("submit", (e) => { e.preventDefault(); envoyer(texte.value); });
   texte.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); envoyer(texte.value); } });
