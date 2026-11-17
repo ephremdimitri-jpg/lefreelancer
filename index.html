@@ -239,6 +239,7 @@ form.f legend, form.f label.t { font: 500 12px var(--f-cote); letter-spacing: .0
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .champ { display: grid; gap: 6px; min-width: 0; }
 form.f input[type=text], form.f input[type=tel], form.f input[type=email], form.f input[type=date], form.f input[type=number], form.f select, form.f textarea { font: 400 16px var(--f-texte); color: var(--encre); background: var(--fond); border: 1.5px solid var(--filet); border-radius: 8px; padding: 11px 12px; width: 100%; }
+form.f select { align-self: start; }
 form.f input:focus, form.f select:focus, form.f textarea:focus { border-color: var(--or); outline: none; }
 .puces { display: flex; flex-wrap: wrap; gap: 8px; }
 .puces label { position: relative; }
@@ -465,7 +466,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
       <details><summary>Combien coûte une prestation ?</summary><p>La conception est chiffrée selon la surface à aménager de chaque niveau (RDC, étage…), avec une offre préférentielle. Le renfort d’équipe est facturé à l’heure (3 250 FCFA à distance, 3 900 FCFA en présentiel). Le suivi de chantier est à 30 000 FCFA par visite : vous choisissez le nombre de visites par semaine ou par mois. Les entreprises partenaires et les commandes régulières bénéficient de conditions dédiées.</p></details>
       <details><summary>Pouvez-vous visiter mon terrain avant de commencer ?</summary><p>Oui. Notre équipe est très occupée en semaine : les visites de site et de chantier ont lieu le samedi, à 8 h, 10 h, 14 h ou 16 h. Choisissez le créneau libre qui vous arrange.</p></details>
       <details><summary>Je n’ai pas d’architecte pour signer mon permis de construire.</summary><p>Notre équipe travaille avec un architecte qualifié, inscrit à l’Ordre, qui signe et accompagne votre dossier. Sa signature est incluse dans notre offre.</p></details>
-      <details><summary>Comment se passe le paiement ?</summary><p>Un acompte au démarrage, puis le solde avant la livraison des fichiers finaux.</p></details>
+      <details><summary>Comment se passe le paiement ?</summary><p>Un acompte de 50 % au démarrage, puis le solde avant la livraison des fichiers finaux. Dès que votre proforma est prête (avec Sira ou le formulaire), le bouton « Payer mon acompte » vous indique le montant et les numéros Orange Money et Moov Money ; vous prévenez ensuite le responsable sur WhatsApp en un clic.</p></details>
       <details><summary>Combien de corrections sont prévues ?</summary><p>Deux séries de corrections sont incluses dans le périmètre convenu. Au-delà, elles sont chiffrées à part.</p></details>
       <details><summary>Pouvez-vous rejoindre notre équipe pour une période ?</summary><p>Oui : une semaine, un mois ou un CDD, à distance, en présentiel ou en mode mixte. Voir la page Assistance entreprises.</p></details>
       <details><summary>Recevons-nous les fichiers sources ?</summary><p>Oui si c’est prévu au devis : les fichiers modifiables sont inclus ou facturés selon la mission.</p></details>
@@ -534,7 +535,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 
 <!-- ================= DEMANDE ================= -->
 <div class="vue" id="v-demande" data-vue="demande" hidden>
-  <div class="wrap page-titre"><span class="cote">Demande</span><h1>Parlons de votre <em>besoin</em></h1><p>Remplissez le formulaire : votre demande est résumée automatiquement, puis transmise directement au responsable. Vous recevez aussitôt votre proforma.</p></div>
+  <div class="wrap page-titre"><span class="cote">Demande</span><h1>Parlons de votre <em>besoin</em></h1><p>Remplissez le formulaire : votre demande est résumée automatiquement, puis transmise directement au responsable. Vous recevez aussitôt votre proforma et pouvez régler l’acompte par Orange Money ou Moov Money.</p></div>
   <section class="bloc"><div class="wrap">
     <div class="onglets" role="tablist" aria-label="Type de demande">
       <button type="button" role="tab" id="tab-devis" aria-selected="true" aria-controls="form-devis">Devis pour un projet</button>
@@ -567,7 +568,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
             <div class="champ"><label class="t" for="d-archi">Signature du permis</label><select id="d-archi"><option>Pas de permis à déposer</option><option>J’ai déjà un architecte</option><option>Je souhaite l’architecte partenaire (signature incluse dans l’offre)</option></select></div>
           </div>
           <div class="duo">
-            <div class="champ"><label class="t" for="d-rdv">Visite du site (le samedi uniquement)</label><input id="d-rdv" type="date"><p class="note" id="d-rdv-note" style="margin:4px 0 0; color:var(--gris)">Le planning de la semaine est chargé : les visites ont lieu le samedi.</p></div>
+            <div class="champ"><label class="t" for="d-rdv">Visite du site (le samedi uniquement)</label><input id="d-rdv" type="date"><p class="note" id="d-rdv-note" style="margin:4px 0 0; color:var(--gris)">Notre équipe est très occupée en semaine : les visites ont lieu le samedi, à 8 h, 10 h, 14 h ou 16 h.</p></div>
             <div class="champ"><label class="t" for="d-rdvh">Heure de la visite</label><select id="d-rdvh"><option value="8">8 h (matin)</option><option value="10">10 h (matin)</option><option value="14">14 h (après-midi)</option><option value="16">16 h (après-midi)</option><option value="">Pas de visite pour l’instant</option></select></div>
           </div>
           <div class="duo" id="d-suivi-c" hidden>
@@ -588,7 +589,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
           </div>
           <div class="champ"><label class="t" for="d-mail">E-mail</label><input id="d-mail" type="email" autocomplete="email"></div>
           <p class="err" id="d-err" aria-live="polite"></p>
-          <button class="btn" type="submit" style="justify-self:start">Résumer ma demande →</button>
+          <button class="btn" type="submit" style="justify-self:start">Obtenir ma proforma →</button>
         </form>
 
         <form class="f" id="form-assist" role="tabpanel" aria-labelledby="tab-assist" novalidate hidden>
@@ -634,14 +635,20 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
             <div class="champ"><label class="t" for="a-mail">E-mail</label><input id="a-mail" type="email" autocomplete="email"></div>
           </div>
           <p class="err" id="a-err" aria-live="polite"></p>
-          <button class="btn" type="submit" style="justify-self:start">Résumer ma demande →</button>
+          <button class="btn" type="submit" style="justify-self:start">Obtenir ma proforma →</button>
         </form>
       </div>
 
       <aside class="resume" aria-live="polite">
         <span class="cote" style="color:#f0a91c">Résumé de votre demande</span>
         <h3 id="r-titre">Votre résumé apparaîtra ici</h3>
-        <pre id="r-texte">Remplissez le formulaire puis cliquez sur « Résumer ma demande ».</pre>
+        <pre id="r-texte">Remplissez le formulaire puis cliquez sur « Obtenir ma proforma ».
+
+Vous recevez aussitôt :
+• votre proforma chiffrée (PDF à télécharger ou sur WhatsApp) ;
+• la date et l’heure de la visite du site, le samedi ;
+• le paiement de l’acompte de 50 % par Orange Money ou Moov Money.</pre>
+        <p class="note" id="r-moyens" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0"><span style="background:#ff7900;color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;font-size:12px">Orange Money</span><span style="background:#0067b1;color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;font-size:12px">Moov Money</span><span style="color:#c9c3b8;font-size:13px">Acompte payable en ligne depuis votre téléphone</span></p>
         <div class="envoi" id="r-envoi" hidden>
           <p class="ok" id="r-etat" aria-live="polite"></p>
           <button class="btn fx-shimmer" type="button" id="r-payer" hidden>Payer mon acompte</button>
