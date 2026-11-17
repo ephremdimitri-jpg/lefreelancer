@@ -534,7 +534,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 
 <!-- ================= DEMANDE ================= -->
 <div class="vue" id="v-demande" data-vue="demande" hidden>
-  <div class="wrap page-titre"><span class="cote">Demande</span><h1>Parlons de votre <em>besoin</em></h1><p>Remplissez le formulaire : votre demande est résumée automatiquement, puis envoyée en un clic à Le Freelancer, ou par Gmail et WhatsApp si vous préférez.</p></div>
+  <div class="wrap page-titre"><span class="cote">Demande</span><h1>Parlons de votre <em>besoin</em></h1><p>Remplissez le formulaire : votre demande est résumée automatiquement, puis transmise directement au responsable. Vous recevez aussitôt votre proforma.</p></div>
   <section class="bloc"><div class="wrap">
     <div class="onglets" role="tablist" aria-label="Type de demande">
       <button type="button" role="tab" id="tab-devis" aria-selected="true" aria-controls="form-devis">Devis pour un projet</button>
@@ -649,9 +649,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
           <a class="btn ligne" id="r-agenda" target="_blank" rel="noopener" hidden>Ajouter la visite à mon agenda</a>
           <button class="btn ligne" type="button" id="r-direct" hidden>Réessayer l’envoi</button>
           <span class="cote" style="color:#c9c3b8">Ou par un autre moyen</span>
-          <a class="btn ligne" id="r-gmail" target="_blank" rel="noopener">Envoyer par Gmail</a>
-          <a class="btn ligne" id="r-wa" target="_blank" rel="noopener">Envoyer le résumé par WhatsApp</a>
-          <a class="btn ligne" id="r-mail">Autre messagerie</a>
+          <a class="btn ligne" id="r-wa" target="_blank" rel="noopener">Envoyer le résumé au responsable (WhatsApp)</a>
           <button class="btn ligne" type="button" id="r-copier">Copier le résumé</button>
           <p class="note">Votre demande est transmise automatiquement à Le Freelancer. Téléchargez votre proforma ou demandez-la sur WhatsApp.</p>
         </div>
@@ -667,7 +665,7 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
     <div class="coord">
       <div class="l"><span><span class="k">Téléphone</span><span class="v">+226 64 18 33 26</span></span><button class="copier" type="button" data-c="+226 64 18 33 26">Copier</button></div>
       <div class="l"><span><span class="k">Téléphone · WhatsApp</span><span class="v">+226 51 43 47 10</span></span><button class="copier" type="button" data-c="+226 51 43 47 10">Copier</button></div>
-      <div class="l"><span><span class="k">E-mail</span><span class="v">ephremdimitri@gmail.com</span></span><button class="copier" type="button" data-c="ephremdimitri@gmail.com">Copier</button></div>
+      <div class="l"><span><span class="k">Nous écrire</span><span class="v">Contacter le responsable</span></span><a class="copier" href="#demande" style="text-decoration:none">Écrire</a></div>
       <div class="l"><span><span class="k">Zone d’intervention</span><span class="v">Burkina Faso et international</span></span></div>
     </div>
   </div>
@@ -677,7 +675,9 @@ footer .wrap { padding-block: 18px; display: flex; justify-content: space-betwee
 <div class="fiche" id="fiche" hidden role="dialog" aria-modal="true" aria-labelledby="f-titre"></div>
 
 <script>
-const EMAIL = "ephremdimitri@gmail.com", WA = "22651434710";
+const WA = "22651434710";
+// Secours si le script Google ne répond pas : code FormSubmit « alias » (sans adresse e-mail visible), laissé vide = désactivé
+const FS_ALIAS = "";
 // >>> Coller ici l'adresse du script Google (https://script.google.com/macros/s/…/exec) <<<
 const GSCRIPT = "https://script.google.com/macros/s/AKfycbwXcyc0USDDmeydsGD-zk6s_3aiMhXt-WlF8z6pQx6BWUHKirhT4yIIDQDWV_uBl_DV/exec";
 window.LF_GSCRIPT = GSCRIPT;
@@ -858,9 +858,7 @@ let sujet = "", corps = "";
 function afficher(titre, s, c) {
   sujet = s; corps = c;
   $("#r-titre").textContent = titre; $("#r-texte").textContent = c;
-  $("#r-gmail").href = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(EMAIL) + "&su=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(c);
   $("#r-wa").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(s + "\n\n" + c);
-  $("#r-mail").href = "mailto:" + EMAIL + "?subject=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(c);
   $("#r-envoi").hidden = false; envoye = false; $("#r-direct").disabled = false; $("#r-direct").textContent = "Envoyer ma demande"; $("#r-etat").textContent = "";
   if (innerWidth < 1000) document.querySelector(".resume").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -973,7 +971,8 @@ $("#r-direct").addEventListener("click", async (e) => {
     if (await envoiGoogle({ sujet, texte: corps, nom: vg("d-nom") || vg("a-ent"), telephone: vg("d-tel") || vg("a-tel"), email: vg("d-mail") || vg("a-mail"), lieu: vg("d-lieu") || vg("a-lieu"), rdv: vg("d-rdvh") })) {
       envoye = true; b.textContent = "Demande envoyée ✓"; $("#r-etat").textContent = "Merci ! Votre demande a bien été envoyée. Nous vous recontactons rapidement."; return;
     }
-    const rep = await fetch("https://formsubmit.co/ajax/" + EMAIL, {
+    if (!FS_ALIAS) throw new Error("pas de secours");
+    const rep = await fetch("https://formsubmit.co/ajax/" + FS_ALIAS, {
       method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ _subject: sujet, _template: "box", _captcha: "false", Demande: corps }),
     });
@@ -983,7 +982,7 @@ $("#r-direct").addEventListener("click", async (e) => {
     $("#r-etat").textContent = "Merci ! Votre demande a bien été envoyée. Nous vous recontactons rapidement.";
   } catch (err) {
     b.disabled = false; b.textContent = "Envoyer ma demande";
-    $("#r-etat").textContent = "L’envoi direct n’a pas abouti. Utilisez Gmail, WhatsApp ou copiez le résumé ci-dessous.";
+    $("#r-etat").textContent = "L’envoi direct n’a pas abouti. Envoyez le résumé au responsable par WhatsApp, ou copiez-le.";
   }
 });
 $("#r-copier").addEventListener("click", async (e) => {
@@ -1416,7 +1415,9 @@ majHeures();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (() => {
-  const MAIL = "ephremdimitri@gmail.com", TEL = "+226 51 43 47 10";
+  const TEL = "+226 51 43 47 10";
+  // secours FormSubmit : code « alias » (sans adresse e-mail visible) ; vide = désactivé, le script Google et la notification suffisent
+  const FS_ALIAS = "";
   // Notifications téléphone : application gratuite « ntfy » abonnée à ce sujet
   const NTFY = "lefreelancer-sira-k7q2m9x4";
 
@@ -1907,7 +1908,7 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     if (logo) { doc.setFillColor(255, 255, 255); doc.roundedRect(14, 9, 24, 24, 3, 3, "F"); doc.addImage(logo, "PNG", 15, 10, 22, 22); }
     doc.setTextColor(...OR); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("Le Freelancer", 43, 20);
     doc.setTextColor(...CLAIR); doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-    doc.text("Plans - Modelisation 3D - Assistance BTP", 43, 26.5); doc.text(t(MAIL + "   |   WhatsApp " + TEL + "   |   Burkina Faso"), 43, 31.5);
+    doc.text("Plans - Modelisation 3D - Assistance BTP", 43, 26.5); doc.text(t("Contact : le responsable, WhatsApp " + TEL + "   |   Burkina Faso"), 43, 31.5);
     doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...OR); doc.text("TRAVAILLER - CREER - REUSSIR", W - 14, 20, { align: "right" });
     // titre
     doc.setTextColor(...NOIR); doc.setFont("helvetica", "bold"); doc.setFontSize(24); doc.text("FACTURE PROFORMA", 14, 60);
@@ -2060,7 +2061,8 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
         if (avecPDF && b) fd.append("attachment", new File([b], "Proforma-" + pf.num + ".pdf", { type: "application/pdf" }));
         if (avecPDF && offre && offre.R.blob) fd.append("attachment2", new File([offre.R.blob], offre.nom, { type: "application/pdf" }));
         else fd.append("Proforma", "PDF non joint : le client l'a téléchargé (référence " + pf.num + ")");
-        try { const r = await fetch("https://formsubmit.co/ajax/" + MAIL, { method: "POST", headers: { Accept: "application/json" }, body: fd }); const j = await r.json().catch(() => ({})); return r.ok && j.success !== "false" && j.success !== false; } catch (err) { return false; }
+        if (!FS_ALIAS) return false;
+        try { const r = await fetch("https://formsubmit.co/ajax/" + FS_ALIAS, { method: "POST", headers: { Accept: "application/json" }, body: fd }); const j = await r.json().catch(() => ({})); return r.ok && j.success !== "false" && j.success !== false; } catch (err) { return false; }
       };
       const b64 = await enB64(b);
       const e2 = pf.e;
