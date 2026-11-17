@@ -920,7 +920,7 @@ $("#form-devis").addEventListener("submit", (e) => {
     ligne("Documents disponibles", val("d-docs")) + (val("d-msg") ? "\nBesoin : " + val("d-msg") + "\n" : "") +
     "\n— Contact —\n" + ligne("Nom / entreprise", val("d-nom")) + ligne("Téléphone", val("d-tel")) + ligne("E-mail", val("d-mail")) +
     "\nMerci de me recontacter.";
-  proformaFormulaire(etatDevis(), "Votre proforma · " + val("d-type"), c.split("\n").filter((l) => / : /.test(l) && !/Nom|Téléphone|E-mail/.test(l)).slice(0, 12));
+  proformaFormulaire(etatDevis(), "Votre proforma · " + val("d-type"), c.split("\n").filter((l) => / : /.test(l) && !/Nom|Téléphone|E-mail|Visite du site/.test(l)).slice(0, 12));
 });
 $("#form-assist").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -1766,22 +1766,42 @@ Termine CHAQUE réponse par une ligne <<<DATA {...}>>> contenant le JSON compact
     }
   }
   // transmission à Le Freelancer : e-mail avec PDF + visite dans l'agenda (script Google), secours FormSubmit, notification téléphone
+  const enB64 = (b) => b ? new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(",")[1] || ""); fr.onerror = () => ok(""); fr.readAsDataURL(b); }) : Promise.resolve("");
+  // même proforma avec une remise commerciale (pour Le Freelancer, à transmettre au client)
+  async function pdfRemise(pct) {
+    const sauvePf = pf, sauveBlob = pdfBlob;
+    const e = JSON.parse(JSON.stringify(pf.e)); e.remise_pct = pct;
+    const c = calcul(e);
+    pf = { ...sauvePf, e, c }; pf.hash = await empreinte(JSON.stringify({ n: pf.num, d: pf.date, cl: e.client, l: e.lignes, r: pct, t: c.net }));
+    pdfBlob = null; let blob = null;
+    try { blob = await construirePDF(); } finally { pf = sauvePf; pdfBlob = sauveBlob; }
+    return { blob, c };
+  }
   async function transmettre() {
     const agenda = lienAgenda();
     let mailOk = false;
     try {
       const b = await construirePDF();
+      // demande par formulaire : Le Freelancer reçoit aussi la proforma avec 10 % de remise, prête à envoyer au client
+      let offre = null;
+      if (pf.source === "formulaire" && pf.e.lignes.length) {
+        const R = await pdfRemise(10), cl = pf.e.client;
+        const wa = "Bonjour " + (cl.nom || "") + ", merci pour votre demande " + pf.num + " sur le site Le Freelancer. Nous avons étudié votre projet et vous accordons une remise de 10 % : le montant passe à " + fcfa(R.c.net) + " au lieu de " + fcfa(pf.c.net) + " (acompte de 50 % : " + fcfa(R.c.acompte) + "). Votre proforma est jointe." + (pf.e.projet.rdvDate ? " Nous confirmons la visite de votre terrain le " + pf.e.projet.rdv + "." : "") + " Bien cordialement, l'équipe Le Freelancer.";
+        offre = { R, wa, b64: await enB64(R.blob), nom: "Proforma-" + pf.num + "-remise-10.pdf" };
+      }
+      const texteOffre = offre ? "\n\n— PROPOSITION À ENVOYER AU CLIENT (remise 10 %) —\nTotal de la demande : " + fcfa(pf.c.net) + "\nRemise commerciale 10 % : − " + fcfa(offre.R.c.remise) + "\nTOTAL APRÈS REMISE : " + fcfa(offre.R.c.net) + "\nAcompte 50 % : " + fcfa(offre.R.c.acompte) + "\nPDF joint : " + offre.nom + " (prêt à envoyer au client)\n\nMessage WhatsApp prêt à envoyer :\n" + offre.wa : "";
       const essai = async (avecPDF) => {
         const fd = new FormData();
         fd.append("_subject", "Nouvelle demande " + (pf.e.client.nom || "") + " – " + pf.num); fd.append("_template", "box"); fd.append("_captcha", "false");
-        fd.append("Demande", resumeTxt); fd.append("Ajouter a l'agenda", agenda);
+        fd.append("Demande", resumeTxt + texteOffre); fd.append("Ajouter a l'agenda", agenda);
         if (avecPDF && b) fd.append("attachment", new File([b], "Proforma-" + pf.num + ".pdf", { type: "application/pdf" }));
+        if (avecPDF && offre && offre.R.blob) fd.append("attachment2", new File([offre.R.blob], offre.nom, { type: "application/pdf" }));
         else fd.append("Proforma", "PDF non joint : le client l'a téléchargé (référence " + pf.num + ")");
         try { const r = await fetch("https://formsubmit.co/ajax/" + MAIL, { method: "POST", headers: { Accept: "application/json" }, body: fd }); const j = await r.json().catch(() => ({})); return r.ok && j.success !== "false" && j.success !== false; } catch (err) { return false; }
       };
-      const b64 = b ? await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(",")[1] || ""); fr.onerror = () => ok(""); fr.readAsDataURL(b); }) : "";
+      const b64 = await enB64(b);
       const e2 = pf.e;
-      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: "Nouvelle demande " + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", rdvHeure: e2.projet.rdvHeure || "", reference: pf.num });
+      if (window.LF_envoiGoogle) mailOk = await window.LF_envoiGoogle({ sujet: (offre ? "Devis formulaire " : "Nouvelle demande ") + (e2.client.nom || "") + " – " + pf.num, texte: resumeTxt + texteOffre + "\n\nAjouter à l'agenda : " + agenda, pdf: b64, nomPdf: "Proforma-" + pf.num + ".pdf", pdf2: offre ? offre.b64 : "", nomPdf2: offre ? offre.nom : "", waTexte: offre ? offre.wa : "", nom: e2.client.nom, telephone: e2.client.telephone, email: e2.client.email, lieu: e2.projet.lieu, ville: e2.client.ville || e2.projet.lieu, rdv: e2.projet.rdv, rdvDate: e2.projet.rdvDate || "", rdvHeure: e2.projet.rdvHeure || "", reference: pf.num });
       if (!mailOk) mailOk = (await essai(true)) || (await essai(false));
     } catch (err) { mailOk = false; }
     const pushOk = await notifierTelephone(agenda);
